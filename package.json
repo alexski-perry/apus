@@ -13,7 +13,8 @@
     "run": "ts-node -r tsconfig-paths/register example/example.ts",
     "test": "jest",
     "build": "tsup",
-    "lint": "tsc"
+    "lint": "tsc",
+    "release": "pnpm run lint && pnpm run build && changeset publish"
   },
   "dependencies": {
     "neo4j-driver": "^5.15.0",
