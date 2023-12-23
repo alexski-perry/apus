@@ -1,12 +1,7 @@
 {
   "name": "neo4j-querier",
-<<<<<<< HEAD
   "version": "0.0.1",
   "private": false,
-=======
-  "version": "0.0.2",
-  "private": true,
->>>>>>> 4cc467a41335233b63c8cd54e1dc4281d8814d6f
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
