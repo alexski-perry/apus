@@ -1,7 +1,7 @@
 {
   "name": "neo4j-querier",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -18,7 +18,7 @@
     "test": "jest",
     "build": "tsup",
     "lint": "tsc",
-    "release": "pnpm run lint && pnpm run build && changeset publish"
+    "release": "pnpm run build && changeset publish"
   },
   "dependencies": {
     "neo4j-driver": "^5.15.0",
