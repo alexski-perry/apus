@@ -6,7 +6,10 @@ settings:
 
 dependencies:
   neo4j-driver:
-    specifier: ^5.11.0
+    specifier: ^5.15.0
+    version: 5.15.0
+  neo4j-driver-core:
+    specifier: ^5.15.0
     version: 5.15.0
   ts-mixer:
     specifier: ^6.0.3

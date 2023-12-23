@@ -16,7 +16,8 @@
     "lint": "tsc"
   },
   "dependencies": {
-    "neo4j-driver": "^5.11.0",
+    "neo4j-driver": "^5.15.0",
+    "neo4j-driver-core": "^5.15.0",
     "ts-mixer": "^6.0.3",
     "ts-toolbelt": "^9.6.0"
   },
