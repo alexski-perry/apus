@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c1574fb2-c72d-475e-a620-207a31f5099a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/website/next.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/website/next.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/website/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/src/app/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/src/app/globals.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/src/app/layout.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/src/app/page.module.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/src/app/page.tsx" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/website" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/cypher/mutation/internal/data-inputs.ts" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2V2CmzqVLh61y7PlS4jyTDLNyba" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="false" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/alexperry/WebstormProjects/neo4j-querier/src/cypher/pattern",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/alexperry/WebstormProjects/neo4j-querier/node_modules/prettier",
+    "settings.editor.selected.configurable": "reference.settingsdialog.IDE.editor.colors.Console Colors",
+    "ts.external.directory.path": "/Users/alexperry/WebstormProjects/neo4j-querier/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/cypher/pattern" />
+      <recent name="$PROJECT_DIR$/src/cypher/types" />
+      <recent name="$PROJECT_DIR$/src/cypher/types/property-types" />
+      <recent name="$PROJECT_DIR$/src/cypher/stages" />
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/cypher/utilities" />
+      <recent name="$PROJECT_DIR$/src/cypher" />
+      <recent name="$PROJECT_DIR$/src/cypher/stages/unsafe" />
+      <recent name="$PROJECT_DIR$/src/core" />
+      <recent name="$PROJECT_DIR$/src/build" />
+    </key>
+    <key name="es6.move.members.recent.items">
+      <recent name="$PROJECT_DIR$/src/cypher/mutation/operations/disconnect.ts" />
+      <recent name="$PROJECT_DIR$/src/cypher/mutation/core/CreatedRelationship.ts" />
+      <recent name="$PROJECT_DIR$/src/cypher/mutation/relationship.ts" />
+      <recent name="$PROJECT_DIR$/src/cypher/expression/core.ts" />
+      <recent name="$PROJECT_DIR$/src/cypher/types/optional.ts" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.build">
+    <configuration name="build" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="build" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/website/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="lint" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="lint" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="run" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="run" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.build" />
+        <item itemvalue="npm.lint" />
+        <item itemvalue="npm.run" />
+        <item itemvalue="npm.dev" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c1574fb2-c72d-475e-a620-207a31f5099a" name="Changes" comment="" />
+      <created>1694024951048</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1694024951048</updated>
+      <workItem from="1694024952066" duration="74156000" />
+      <workItem from="1694458380238" duration="52000" />
+      <workItem from="1694458439360" duration="3855000" />
+      <workItem from="1694462332732" duration="25494000" />
+      <workItem from="1694542317543" duration="35730000" />
+      <workItem from="1694702974636" duration="655000" />
+      <workItem from="1694720124640" duration="9000" />
+      <workItem from="1694776922739" duration="23108000" />
+      <workItem from="1695129686430" duration="9831000" />
+      <workItem from="1695483562154" duration="6000" />
+      <workItem from="1695636566885" duration="27424000" />
+      <workItem from="1695725299517" duration="853000" />
+      <workItem from="1695726157918" duration="1506000" />
+      <workItem from="1695729302058" duration="2649000" />
+      <workItem from="1695764795793" duration="5855000" />
+      <workItem from="1695892358290" duration="235000" />
+      <workItem from="1695892601304" duration="16285000" />
+      <workItem from="1695916450880" duration="135000" />
+      <workItem from="1695916592323" duration="57749000" />
+      <workItem from="1696171555073" duration="6241000" />
+      <workItem from="1698062286942" duration="9000" />
+      <workItem from="1698946943050" duration="65000" />
+      <workItem from="1699020640229" duration="6967000" />
+      <workItem from="1699116924628" duration="2359000" />
+      <workItem from="1699380734223" duration="17000" />
+      <workItem from="1699720451893" duration="15816000" />
+      <workItem from="1699886859578" duration="13203000" />
+      <workItem from="1702293051183" duration="11996000" />
+      <workItem from="1702320220052" duration="6376000" />
+      <workItem from="1702393272762" duration="36491000" />
+      <workItem from="1702495120348" duration="4000" />
+      <workItem from="1702554506187" duration="85761000" />
+      <workItem from="1703244401170" duration="2396000" />
+      <workItem from="1703248977616" duration="31565000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+    <option name="exactExcludedFiles">
+      <list>
+        <option value="$PROJECT_DIR$/website/src/theme.config.js" />
+        <option value="$PROJECT_DIR$/website/src/theme.config.js.map" />
+      </list>
+    </option>
+  </component>
+</project>

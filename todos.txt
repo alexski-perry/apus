@@ -1,0 +1,50 @@
+
+CRITICAL
+- deleting subtypes
+- yielding from procedure
+- standard functions/procedures/aggregations
+- better conditional logic (at runtime level - i.e. to produce different queries)
+
+FEATURES
+- clear() relation operation
+- relateToDynamic() relation operation
+    - allows you to set relationship properties per node being connected (via callback fn)
+
+IMPROVEMENTS
+- add more runtime validation throughout query building (especially mutations)
+- add custom exception types
+- deep merging of query data [probably critical]
+
+NEEDS INVESTIGATION
+- parameterized queries (for performance), for example:
+    -  const allBlogPosts = makeQuery(() =>
+         start()
+           .pipe(() => $matchNode(":bp", BlogPost))
+           .pipe(({ bp }) => $map(params.name)),
+       );
+    -  const getBlogPost = makeQuery({id: String}, (params) =>
+         findByID(BlogPost, params.id)
+            .pipe(bp => ({
+                title: bp.title,
+                age:   bp.age
+            })
+        )
+      );
+
+
+OTHER NOTES:
+
+  SUMMARY OF RELATION OPERATIONS:
+      one
+        - relateTo<one>() (provided node must be found)
+        - replace() (if provided node not found, not action taken)
+
+      optional
+        - relateTo<one | optional>() (if provided node not found, disconnected)
+        - replace() (if provided node not found, no action taken)
+        - remove()
+
+      many (array):
+        - relateTo<any>()
+        - disconnect()
+        - clear()

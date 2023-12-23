@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2016",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "downlevelIteration": true,
+    "noEmit": true,
+    "baseUrl": "src",
+    "paths": {
+      "@core": ["core"],
+      "@core/*": ["core/*"],
+      "@cypher": ["cypher"],
+      "@cypher/*": ["cypher/*"],
+      "@schema/*": ["schema/*"],
+      "@utils/*": ["utils/*"],
+      "neo4j-querier/*": ["./*"],
+      "neo4j-querier": ["./"]
+    }
+  },
+  "exclude": ["website"]
+}
