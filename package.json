@@ -5,12 +5,12 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@alexski-perry"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/alexski-perry/neo4j-querier"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/alexski-perry"
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
