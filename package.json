@@ -8,6 +8,10 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/@alexski-perry"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexski-perry/neo4j-querier"
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "run": "ts-node -r tsconfig-paths/register example/example.ts",
