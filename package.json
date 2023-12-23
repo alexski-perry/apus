@@ -1,5 +1,5 @@
 {
-  "name": "neo4j-querier",
+  "name": "@alexski-perry/neo4j-querier",
   "version": "0.0.1",
   "private": false,
   "main": "dist/index.js",
