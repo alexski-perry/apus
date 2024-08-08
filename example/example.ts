@@ -1,6 +1,6 @@
-import { $throwIf, $optionalMatchNode, $updateNode, $where } from "neo4j-querier/stages";
+import { $throwIf, $optionalMatchNode, $updateNode, $where } from "neo4j-querier/Stages";
 import { BlogPost, Image, PublishedBlogPost } from "./schemas/blog";
-import { createNode, findAll, findAllByIDs, findByID, project } from "neo4j-querier/queries";
+import { createNode, findAll, findAllByIDs, findByID, project } from "neo4j-querier/Queries";
 import { equals, isNotNull, isNull } from "@cypher/expression/operators";
 import { query } from "@core/query";
 import { runQuery } from "./runQuery";

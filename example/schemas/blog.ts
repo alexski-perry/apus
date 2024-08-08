@@ -11,7 +11,7 @@ import {
   string,
   string_list,
   string_optional
-} from "neo4j-querier/fields";
+} from "neo4j-querier/Fields";
 import { isSlug } from "../utils";
 import { matchesRegex } from "@cypher/expression/function/string";
 import { node, relationship } from "@schema/entity-config";

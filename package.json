@@ -4,18 +4,13 @@
   "private": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
-    "module2": {
-      "import": "./dist/es/module2.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/types/module2.ts"
-    }
+    "./*": "./*"
   },
   "repository": {
     "type": "git",

@@ -1,5 +1,7 @@
-import * as Types from "./types";
-import * as Fields from "./fields";
-import * as Stages from "./stages";
-import * as Queries from "./queries";
+import * as Types from "./Types";
+import * as Fields from "./Fields";
+import * as Stages from "./Stages";
+import * as Queries from "./Queries";
 export { Fields, Types, Stages, Queries };
+
+export {query} from "./core/query";
