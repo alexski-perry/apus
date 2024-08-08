@@ -1,11 +1,21 @@
-import { $where } from "@cypher/stages";
-import { anyProp, inList } from "cypher/expression";
-import { findAll } from "@cypher/queries";
-import { ID } from "@cypher/types";
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { NodeLikeOrUnionDefinition } from "@schema/definition";
+import { propUnsafe } from "@cypher/expression/prop";
+import { findAll } from "@cypher/queries/findAll";
+import { $where } from "@cypher/stages/$where";
+import { inList } from "@cypher/expression/operators";
+import {
+  AbstractNodeDefinitionClass,
+  NodeDefinitionClass,
+  NodeUnionDefinitionClass,
+} from "@schema/definition";
+import { query } from "@core/query";
 
-export const findAllByIDs = <TNode extends string | ConstructorOf<NodeLikeOrUnionDefinition>>(
-  node: TNode,
+export const findAllByIDs = <
+  TDef extends
+    | string
+    | NodeDefinitionClass
+    | AbstractNodeDefinitionClass
+    | NodeUnionDefinitionClass,
+>(
+  node: TDef,
   ids: string[],
-) => findAll(node).pipe(node => $where(inList(anyProp(node, "id", ID), ids)));
+) => query(findAll(node), node => $where(inList(propUnsafe(node, "id"), ids)));

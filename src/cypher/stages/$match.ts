@@ -1,32 +1,43 @@
-import { MatchPattern, QueryStage, queryStage } from "@core";
-import { resolveMatchPattern$ } from "@core/resolve-utils";
 import { matchClause } from "@core/clause";
-import { DeepMakeOptional } from "@cypher/types";
+import { MatchPattern } from "@core/pattern/match-pattern";
+import { queryOperation, QueryOperation } from "@core/query-operation";
+
+import { MakeQueryDataOptional } from "@core/query-data";
 
 export const $match = <TPattern extends MatchPattern<any, any>>(
   pattern: TPattern,
-): MatchOperation<TPattern> => createMatchStage(pattern, false);
+): MatchOperation<TPattern> => createMatchStage(pattern, false, "$match");
 
 export const $optionalMatch = <TPattern extends MatchPattern<any, any>>(
   pattern: TPattern,
-): OptionalMatchOperation<TPattern> => createMatchStage(pattern, true);
+): OptionalMatchOperation<TPattern> => createMatchStage(pattern, true, "$optionalMatch");
 
 const createMatchStage = (
   pattern: MatchPattern<any, any>,
   isOptional: boolean,
-): QueryStage<any, any, any> => {
-  const patternData = MatchPattern.getData(pattern);
-  const { dataShape, pattern: clausePattern } = resolveMatchPattern$(patternData, isOptional);
+  name: string,
+): QueryOperation<any, any, any> => {
+  const matchPatternData = MatchPattern.getData(pattern);
 
-  return queryStage({
-    clauses: [matchClause([clausePattern], { isOptional })],
-    outputShape: dataShape,
-    cardinalityBehaviour: {
-      one: "same" as const,
-      "none-or-one": "optional" as const,
-      many: "force-many" as const,
-    }[patternData.cardinality],
-    dataBehaviour: "merge",
+  return queryOperation({
+    name,
+    resolver: resolveInfo => {
+      const { dataShape, pattern: patternForClause } = resolveInfo.resolveMatchPattern(
+        matchPatternData,
+        isOptional,
+      );
+
+      return {
+        clauses: [matchClause([patternForClause], { isOptional })],
+        outputShape: dataShape,
+        cardinalityBehaviour: {
+          one: "same" as const,
+          "none-or-one": "optional" as const,
+          many: "force-many" as const,
+        }[matchPatternData.cardinality],
+        dataBehaviour: "merge",
+      };
+    },
   });
 };
 
@@ -34,7 +45,7 @@ const createMatchStage = (
   TYPES
  */
 
-type MatchOperation<TPattern extends MatchPattern<any, any>> = QueryStage<
+type MatchOperation<TPattern extends MatchPattern<any, any>> = QueryOperation<
   TPattern extends MatchPattern<infer TData, any> ? TData : never,
   TPattern extends MatchPattern<any, infer TCardinality>
     ? {
@@ -46,8 +57,8 @@ type MatchOperation<TPattern extends MatchPattern<any, any>> = QueryStage<
   "merge"
 >;
 
-type OptionalMatchOperation<TPattern extends MatchPattern<any, any>> = QueryStage<
-  TPattern extends MatchPattern<infer TData, any> ? DeepMakeOptional<TData> : never,
+type OptionalMatchOperation<TPattern extends MatchPattern<any, any>> = QueryOperation<
+  TPattern extends MatchPattern<infer TData, any> ? MakeQueryDataOptional<TData> : never,
   TPattern extends MatchPattern<any, infer TCardinality>
     ? {
         one: "same";

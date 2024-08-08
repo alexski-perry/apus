@@ -1,8 +1,9 @@
-import { Cardinality, queryStage, QueryStage } from "@core";
+import { QueryCardinality } from "@core/query-cardinality";
+import { queryOperation, QueryOperation } from "@core/query-operation";
 
-export const $forceCardinality = <TCardinality extends Cardinality>(
+export const $forceCardinality = <TCardinality extends QueryCardinality>(
   cardinality: TCardinality,
-): QueryStage<
+): QueryOperation<
   void,
   {
     one: "force-one";
@@ -10,14 +11,20 @@ export const $forceCardinality = <TCardinality extends Cardinality>(
     many: "force-many";
   }[TCardinality],
   "merge"
-> =>
-  queryStage({
-    outputShape: undefined,
-    clauses: [],
-    cardinalityBehaviour: {
-      one: "force-one" as const,
-      "none-or-one": "force-none-or-one" as const,
-      many: "force-many" as const,
-    }[cardinality],
-    dataBehaviour: "merge",
+> => {
+  return queryOperation({
+    name: "$forceCardinality",
+    resolver: () => {
+      return {
+        outputShape: undefined,
+        clauses: [],
+        cardinalityBehaviour: {
+          one: "force-one" as const,
+          "none-or-one": "force-none-or-one" as const,
+          many: "force-many" as const,
+        }[cardinality],
+        dataBehaviour: "merge",
+      };
+    },
   });
+};

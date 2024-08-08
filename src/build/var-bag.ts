@@ -1,5 +1,5 @@
-import { Variable } from "@core/value-data";
-import { Type } from "@core/type";
+import { Variable } from "@core/value-info";
+import { Type } from "@core/type/type";
 
 export class VarBag {
   private varCount: number = 0;

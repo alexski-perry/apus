@@ -1,87 +1,221 @@
-import { Any, NodeUnionValue, NodeValue, String } from "@cypher/types";
-import { mergeIntoQueryStage, QueryStage } from "@core/query-stage";
-import { getNodeConcreteSubtypes, loadNodeLikeOrUnionModel } from "@schema/models";
-import { subquery } from "@cypher/query";
-import { $optionalMatch } from "@cypher/stages/$match";
-import { pattern } from "@cypher/pattern/match-pattern-builder";
-import { constructorOf } from "@utils/ConstructorOf";
-import { $where } from "@cypher/stages/$where";
-import { Query } from "@core";
-import { $delete } from "@cypher/stages/unsafe/$delete";
-import { anyProp, hasLabel, isNotNull } from "@cypher/expression";
-import { $effect } from "@cypher/stages/$effect";
-import { $callProcedure } from "@cypher/stages/$callProcedure";
-import { parameterize } from "@cypher/expression/param";
-import { expression } from "@cypher/expression/core";
+import { expression } from "@core/expression";
+import { Node, NodeValue } from "@cypher/types/structural/node";
+import { loadModel } from "@schema/loadModel";
+import { Any } from "@cypher/types/any";
+import { String } from "@cypher/types/scalar/string";
+import { and, hasLabel, isNotNull } from "@cypher/expression/operators";
+import { propUnsafe } from "@cypher/expression/prop";
+import {
+  AbstractNodeModel,
+  AbstractRelationshipModel,
+  getDefinitionClass,
+  NodeModel,
+  NodeUnionModel,
+  RelationshipModel,
+} from "@schema/model";
+import {
+  getNodeLabelsForMatching,
+  getModelDebugName,
+  getRelationshipName,
+} from "@schema/utils";
+import { parameterize } from "@core/parameterize";
+import { queryOperation, QueryOperation } from "@core/query-operation";
+import {
+  callProcedureClause,
+  callSubqueryClause,
+  CallSubqueryClause,
+  Clause,
+  deleteClause,
+  importWithClause,
+  matchClause,
+  resetCardinalityReturnClause,
+  whereClause,
+} from "@core/clause";
+import { Variable } from "@core/value-info";
+import { Value } from "@core/value";
+import { QueryOperationResolveInfo } from "@build/QueryOperationResolveInfo";
+import { RelationshipValue } from "@cypher/types/structural/relationship";
 
-export const $deleteNode = (
-  node: NodeValue | NodeUnionValue,
-): QueryStage<void, "same", "merge"> => {
-  const definition =
-    node instanceof NodeValue
-      ? NodeValue.getDefinition(node)
-      : NodeUnionValue.getDefinition(node);
+export const $deleteNode = (node: Node): QueryOperation<undefined, "same", "merge"> => {
+  const definition = NodeValue.getDefinition(node);
 
-  // untyped node
-  if (typeof definition === "string") {
-    return $deleteNode(node);
+  if (typeof definition === "string") throw new Error("untyped $deleteNode not yet supported");
+
+  return queryOperation({
+    name: "$deleteNode",
+    resolver: resolveInfo => {
+      const toDeleteVariable = resolveInfo.resolveVariable(node);
+      const deleteClauses = handleDelete({
+        toDeleteVariable,
+        resolveInfo,
+        model: loadModel(definition),
+      });
+
+      return {
+        clauses: deleteClauses,
+        outputShape: undefined,
+        cardinalityBehaviour: "same",
+        dataBehaviour: "merge",
+      };
+    },
+  });
+};
+
+function handleDelete(params: {
+  toDeleteVariable: Variable;
+  model:
+    | NodeModel
+    | AbstractNodeModel
+    | NodeUnionModel
+    | RelationshipModel
+    | AbstractRelationshipModel;
+  resolveInfo: QueryOperationResolveInfo;
+}): Clause[] {
+  const { toDeleteVariable, model, resolveInfo } = params;
+
+  const effectClauses: CallSubqueryClause[] = [];
+
+  function recursivelyAddSubtypeEffects(
+    subtypeModel: NodeModel | AbstractNodeModel,
+    parentKeys: Set<string>,
+  ) {
+    const { clause, coveredKeys } = getSubtypeQuery({
+      toDeleteVariable,
+      resolveInfo,
+      subtypeModel,
+      ignoreKeys: parentKeys,
+    });
+    effectClauses.push(clause);
+
+    subtypeModel.subtypes.forEach(subtypeSubtypeModel => {
+      recursivelyAddSubtypeEffects(
+        subtypeSubtypeModel,
+        new Set([...parentKeys, ...coveredKeys]),
+      );
+    });
   }
 
-  const model = loadNodeLikeOrUnionModel(definition);
-  const concreteSubtypes = getNodeConcreteSubtypes(model);
+  if (model.kind === "NodeUnion") {
+    model.subtypes.forEach(subtypeModel =>
+      recursivelyAddSubtypeEffects(subtypeModel, new Set()),
+    );
+  } else if (model.kind === "Node" || model.kind === "AbstractNode") {
+    recursivelyAddSubtypeEffects(model, new Set());
+  }
 
-  console.log(concreteSubtypes);
+  return [...effectClauses, deleteClause(toDeleteVariable)];
+}
 
-  let deleteQuery = subquery(node);
+function getSubtypeQuery(params: {
+  toDeleteVariable: Variable;
+  resolveInfo: QueryOperationResolveInfo;
+  subtypeModel: NodeModel | AbstractNodeModel;
+  ignoreKeys: Set<string>;
+}): { clause: CallSubqueryClause; coveredKeys: Array<string> } {
+  const { toDeleteVariable, resolveInfo, subtypeModel, ignoreKeys } = params;
 
-  concreteSubtypes.forEach(subtypeModel => {
-    // todo also need to filter out child concrete subtypes
-    let subtypeQuery = subquery(node).pipe(node => $where(hasLabel(node, subtypeModel.label)));
+  const subqueryClauses: Clause[] = [];
+  const coveredKeys: Array<string> = [];
 
-    const addEffect = (query: Query<any, any>) => {
-      subtypeQuery = subtypeQuery.pipe(() => $effect(query));
-    };
-
-    Object.values(subtypeModel.relations).forEach(relationModel => {
-      const relationQuery = subquery({ from: node }).pipe(({ from }) =>
-        $optionalMatch(
-          pattern()
-            .node(from)
-            .newRelationship(
-              constructorOf(relationModel.relationship.definition), // todo use helper function such as dynamic()
-              relationModel.direction,
-              ":rel",
-            )
-            .newNode(constructorOf(relationModel.to.definition) as unknown as string, ":to"), // todo use helper function such as dynamic()
+  subqueryClauses.push(
+    importWithClause([toDeleteVariable]),
+    whereClause([
+      Value.getValueInfo(
+        and(
+          ...getNodeLabelsForMatching(subtypeModel).map(label =>
+            hasLabel(Value.createRaw(toDeleteVariable) as any, label),
+          ),
         ),
-      );
+      ),
+    ]),
+  );
 
-      if (relationModel.deletionStrategy === "no-delete") {
-        addEffect(
-          relationQuery.pipe(({ rel, from }) =>
-            $callProcedure("apoc.util.validate", [
-              isNotNull(rel),
+  Object.values(subtypeModel.relations).forEach(relationModel => {
+    if (ignoreKeys.has(relationModel.key)) return; // already covered by supertype
+    coveredKeys.push(relationModel.key);
+
+    const relationshipVariable = resolveInfo.defineVariable(
+      RelationshipValue.makeType(getDefinitionClass(relationModel.relationship)),
+    );
+
+    const connectedNodeVariable = resolveInfo.defineVariable(
+      NodeValue.makeType(getDefinitionClass(relationModel.to)),
+    );
+
+    const effectClauses: Clause[] = [
+      matchClause([
+        [
+          {
+            entityType: "node",
+            variable: toDeleteVariable,
+            nodeLabels: [],
+          },
+          {
+            entityType: "relationship",
+            variable: relationshipVariable,
+            relationshipNames: getRelationshipName(relationModel.relationship),
+            direction: relationModel.direction,
+          },
+          {
+            entityType: "node",
+            variable: connectedNodeVariable,
+            nodeLabels: getNodeLabelsForMatching(relationModel.to),
+          },
+        ],
+      ]),
+    ];
+
+    if (relationModel.deletionStrategy === "no-delete") {
+      effectClauses.push(
+        callProcedureClause({
+          name: "apoc.util.validate",
+          args: [
+            Value.getValueInfo(isNotNull(Value.createRaw(relationshipVariable))),
+            Value.getValueInfo(
               parameterize(
-                `Can't delete '${subtypeModel.debugName}' with ID '%s' because one or more '${relationModel.key}' relations exist`,
+                `Can't delete '${getModelDebugName(
+                  subtypeModel,
+                )}' with ID '%s' because one or more '${relationModel.key}' relations exist`,
                 String,
               ),
-              expression(Any)`[${anyProp(from, "id")}]`,
-            ]),
-          ),
-        );
-      }
+            ),
+            Value.getValueInfo(
+              expression(Any)`[${propUnsafe(Value.createRaw(toDeleteVariable) as any, "id")}]`,
+            ),
+          ],
+          yields: [],
+        }),
+      );
+    }
 
-      if (relationModel.deletionStrategy === "disconnect") {
-        addEffect(relationQuery.pipe(({ rel }) => $delete(rel)));
-      }
+    if (relationModel.deletionStrategy === "disconnect") {
+      effectClauses.push(
+        ...handleDelete({
+          toDeleteVariable: relationshipVariable,
+          resolveInfo,
+          model: relationModel.relationship,
+        }),
+      );
+    }
 
-      if (relationModel.deletionStrategy === "cascade") {
-        throw new Error("cascading not supported yet"); // todo decide whether to support
-      }
-    });
+    if (relationModel.deletionStrategy === "cascade") {
+      throw new Error("cascading not supported yet"); // todo decide whether to support
+    }
 
-    deleteQuery = deleteQuery.pipe(() => $effect(subtypeQuery));
+    subqueryClauses.push(
+      callSubqueryClause([
+        importWithClause([toDeleteVariable]),
+        ...effectClauses,
+        resetCardinalityReturnClause(resolveInfo.defineVariable(Any)),
+      ]),
+    );
   });
 
-  return mergeIntoQueryStage(deleteQuery.pipe(node => $delete(node)));
-};
+  return {
+    clause: callSubqueryClause([
+      ...subqueryClauses,
+      resetCardinalityReturnClause(resolveInfo.defineVariable(Any)),
+    ]),
+    coveredKeys,
+  };
+}

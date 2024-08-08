@@ -1,4 +1,4 @@
-import { Date } from "@cypher/types";
-import { expression } from "@cypher/expression/core";
+import { Date } from "@cypher/types/scalar/date";
+import { expression } from "@core/expression";
 
 export const now = () => expression(Date)`now()`;

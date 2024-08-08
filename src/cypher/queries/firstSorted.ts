@@ -1,9 +1,14 @@
-import { Query, QueryData } from "@core";
-import { $first, $orderBy } from "@cypher/stages";
-import { Orderings } from "@cypher/stages/$orderBy";
+import { $orderBy, Orderings } from "@cypher/stages/$orderBy";
+import { QueryData } from "@core/query-data";
+import { Query, query_untyped } from "@core/query";
+import { $first } from "@cypher/stages/$first";
 
 export const firstSorted = <TData extends QueryData>(
-  query: Query<TData, "many">,
+  inputQuery: Query<TData, "many">,
   sorter: (data: TData) => Orderings,
 ): Query<TData, "one"> =>
-  query.pipe(out => $orderBy(sorter(out))).pipe(() => $first()) as Query<any, any>;
+  query_untyped(
+    inputQuery,
+    data => $orderBy(sorter(data)),
+    () => $first(),
+  );

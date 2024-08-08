@@ -1,7 +1,8 @@
-import { Boolean, String, StringValue } from "@cypher/types";
-import { ValueOrInputType } from "@core/utils/value";
-import { expression } from "@cypher/expression/core";
-import { parameterize } from "@cypher/expression/param";
+import { expression } from "@core/expression";
+import { ValueOrInputType } from "@core/value";
+import { StringValue, String } from "@cypher/types/scalar/string";
+import { Boolean } from "@cypher/types/scalar/boolean";
+import { parameterize } from "@core/parameterize";
 
 export const toUpper = (value: StringValue): String => expression(String)`toUpper(${value})`;
 

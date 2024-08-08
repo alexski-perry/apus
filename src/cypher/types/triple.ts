@@ -1,15 +1,14 @@
 import { ConstructorOf } from "@utils/ConstructorOf";
-import { Value } from "@core/value";
-import { QueryDataOutput, QueryDataInput } from "@core/utils/query-data";
+import { GetValueInputType, GetValueOutputType, Value } from "@core/value";
 import { Neo4jValue } from "@core/neo4j-value";
-import { getDebugName, parseValue, serializeValue, setTypeInfo } from "@core/type";
+import { parseValue, serializeValue, TypeOf } from "@core/type/type";
+import { getDebugName, setTypeInfo } from "@core/type/type-info";
 
 export class Triple<T1 extends Value, T2 extends Value, T3 extends Value> extends Value<
-  [QueryDataInput<T1>, QueryDataInput<T2>, QueryDataInput<T3>],
-  [QueryDataOutput<T1>, QueryDataOutput<T2>, QueryDataOutput<T3>]
+  ["Triple", T1, T2, T3],
+  [GetValueInputType<T1>, GetValueInputType<T2>, GetValueInputType<T3>],
+  [GetValueOutputType<T1>, GetValueOutputType<T2>, GetValueOutputType<T3>]
 > {
-  private declare _typeInfo_triple: [T1, T2, T3];
-
   constructor(
     private _firstType: ConstructorOf<Value>,
     private _secondType: ConstructorOf<Value>,
@@ -18,21 +17,21 @@ export class Triple<T1 extends Value, T2 extends Value, T3 extends Value> extend
     super();
   }
 
-  static of<T1 extends Value, T2 extends Value, T3 extends Value>(
-    firstType: ConstructorOf<T1>,
-    secondType: ConstructorOf<T2>,
-    thirdType: ConstructorOf<T3>,
-  ): ConstructorOf<Triple<T1, T2, T3>> {
-    const tripleClass = class extends Triple<T1, T2, T3> {
+  static makeType<T1 extends Value, T2 extends Value, T3 extends Value>(
+    firstType: TypeOf<T1>,
+    secondType: TypeOf<T2>,
+    thirdType: TypeOf<T3>,
+  ): TypeOf<Triple<T1, T2, T3>> {
+    const type = class extends Triple<T1, T2, T3> {
       constructor() {
         super(firstType, secondType, thirdType);
       }
     };
 
     setTypeInfo<
-      [QueryDataInput<T1>, QueryDataInput<T2>, QueryDataInput<T3>],
-      [QueryDataOutput<T1>, QueryDataOutput<T2>, QueryDataOutput<T3>]
-    >(tripleClass, {
+      [GetValueInputType<T1>, GetValueInputType<T2>, GetValueInputType<T3>],
+      [GetValueOutputType<T1>, GetValueOutputType<T2>, GetValueOutputType<T3>]
+    >(type, {
       parseValue: (val: Neo4jValue) => {
         if (!Array.isArray(val)) return undefined;
 
@@ -78,7 +77,7 @@ export class Triple<T1 extends Value, T2 extends Value, T3 extends Value> extend
       )}, ${getDebugName(thirdType)}>`,
     });
 
-    return tripleClass;
+    return type;
   }
 
   static getTypes(triple: Triple<any, any, any>) {

@@ -1,18 +1,14 @@
-import { ValueData, Variable } from "@core/value-data";
-import { ClauseList } from "@core/clause-list";
-import { CreationPatternDirection, MatchPatternDirection } from "@core/pattern";
-
-export type AnnotatedClause = {
-  clause: Clause;
-  level: number;
-};
+import { ValueInfo, Variable } from "@core/value-info";
+import { MatchPatternDirection } from "@core/pattern/match-pattern";
+import { CreationPatternDirection } from "@core/pattern/creation-pattern";
+import { Value } from "@core/value";
+import { expression } from "@core/expression";
+import { Any } from "@cypher/types/any";
 
 export type Clause =
-  | BaseClause<null>
   | MatchClause
   | WithClause
   | ImportWithClause
-  | WildcardWithClause
   | ReturnClause
   | OrderByClause
   | WhereClause
@@ -29,15 +25,15 @@ export type Clause =
   | LimitClause
   | UnwindClause;
 
-interface BaseClause<T extends string | null> {
-  type: T;
-}
-
 /*
   HELPERS
  */
 
-export type MatchPattern = Array<
+interface BaseClause<T extends string> {
+  type: T;
+}
+
+export type MatchClausePattern = Array<
   | {
       entityType: "node";
       variable: Variable | null;
@@ -65,10 +61,10 @@ export type CreateClausePattern = Array<
     }
 >;
 
-export type ClauseMapping = { output: Variable; input?: ValueData };
-export type ClauseOrdering = { expression: ValueData; direction: "ASC" | "DESC" };
-export type Predicate = ValueData;
-export type ProcedureArg = ValueData;
+export type ClauseMapping = { output: Variable; input?: ValueInfo };
+export type ClauseOrdering = { expression: ValueInfo; direction: "ASC" | "DESC" };
+export type Predicate = ValueInfo;
+export type ProcedureArg = ValueInfo;
 export type ProcedureResult = { name: string; output: Variable };
 
 /*
@@ -76,12 +72,12 @@ export type ProcedureResult = { name: string; output: Variable };
  */
 
 export interface MatchClause extends BaseClause<"MATCH"> {
-  patterns: Array<MatchPattern>;
+  patterns: Array<MatchClausePattern>;
   isOptional: boolean;
 }
 
 export const matchClause = (
-  patterns: Array<MatchPattern>,
+  patterns: Array<MatchClausePattern>,
   options?: { isOptional: boolean },
 ): MatchClause => ({
   type: "MATCH",
@@ -92,15 +88,17 @@ export const matchClause = (
 export interface WithClause extends BaseClause<"WITH"> {
   mappings: Array<ClauseMapping>;
   isDistinct: boolean;
+  hasWildcard: boolean;
 }
 
 export const withClause = (
   mappings: Array<ClauseMapping>,
-  options?: { isDistinct: boolean },
+  options?: { isDistinct?: boolean; hasWildcard?: boolean },
 ): WithClause => ({
   type: "WITH",
   mappings,
   isDistinct: options?.isDistinct ?? false,
+  hasWildcard: options?.hasWildcard ?? false,
 });
 
 export interface ImportWithClause extends BaseClause<"IMPORT WITH"> {
@@ -110,12 +108,6 @@ export interface ImportWithClause extends BaseClause<"IMPORT WITH"> {
 export const importWithClause = (variables: Array<Variable>): ImportWithClause => ({
   type: "IMPORT WITH",
   variables,
-});
-
-export interface WildcardWithClause extends BaseClause<"WILDCARD WITH"> {}
-
-export const wildcardWithClause = (): WildcardWithClause => ({
-  type: "WILDCARD WITH",
 });
 
 export interface ReturnClause extends BaseClause<"RETURN"> {
@@ -130,6 +122,17 @@ export const returnClause = (
   type: "RETURN",
   mappings,
   isDistinct: options?.isDistinct ?? false,
+});
+
+export const resetCardinalityReturnClause = (ignoredVariable: Variable): ReturnClause => ({
+  type: "RETURN",
+  mappings: [
+    {
+      input: Value.getValueInfo(expression(Any)`count(null)`),
+      output: ignoredVariable,
+    },
+  ],
+  isDistinct: false,
 });
 
 export interface OrderByClause extends BaseClause<"ORDER BY"> {
@@ -151,19 +154,21 @@ export const whereClause = (predicates: Array<Predicate>): WhereClause => ({
 });
 
 export interface CallSubqueryClause extends BaseClause<"CALL SUBQUERY"> {
-  clauses: ClauseList;
+  clauses: Array<Clause>;
 }
 
-export const callSubqueryClause = (clauses: ClauseList): CallSubqueryClause => ({
+export const callSubqueryClause = (clauses: Array<Clause>): CallSubqueryClause => ({
   type: "CALL SUBQUERY",
   clauses,
 });
 
 export interface UnionSubqueryClause extends BaseClause<"UNION SUBQUERY"> {
-  subqueries: Array<ClauseList>;
+  subqueries: Array<Array<Clause>>;
 }
 
-export const unionSubqueryClause = (subqueries: Array<ClauseList>): UnionSubqueryClause => ({
+export const unionSubqueryClause = (
+  subqueries: Array<Array<Clause>>,
+): UnionSubqueryClause => ({
   type: "UNION SUBQUERY",
   subqueries,
 });
@@ -195,13 +200,13 @@ export const createClause = (patterns: Array<CreateClausePattern>): CreateClause
 export interface SetPropertyClause extends BaseClause<"SET"> {
   entity: Variable;
   propertyName: string;
-  value: ValueData;
+  value: ValueInfo;
 }
 
 export const setPropertyClause = (data: {
   entity: Variable;
   propertyName: string;
-  value: ValueData;
+  value: ValueInfo;
 }): SetPropertyClause => ({
   type: "SET",
   ...data,
@@ -258,29 +263,29 @@ export const removeLabelClause = (data: {
 });
 
 export interface SkipClause extends BaseClause<"SKIP"> {
-  value: ValueData;
+  value: ValueInfo;
 }
 
-export const skipClause = (value: ValueData): SkipClause => ({
+export const skipClause = (value: ValueInfo): SkipClause => ({
   type: "SKIP",
   value,
 });
 
 export interface LimitClause extends BaseClause<"LIMIT"> {
-  value: ValueData;
+  value: ValueInfo;
 }
 
-export const limitClause = (value: ValueData): LimitClause => ({
+export const limitClause = (value: ValueInfo): LimitClause => ({
   type: "LIMIT",
   value,
 });
 
 export interface UnwindClause extends BaseClause<"UNWIND"> {
-  list: ValueData;
+  list: ValueInfo;
   output: Variable;
 }
 
-export const unwindClause = (data: { list: ValueData; output: Variable }): UnwindClause => ({
+export const unwindClause = (data: { list: ValueInfo; output: Variable }): UnwindClause => ({
   type: "UNWIND",
   ...data,
 });

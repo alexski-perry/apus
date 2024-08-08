@@ -1,6 +1,6 @@
-import { Property } from "@schema/property";
-import { ValueOrInputType } from "@core/utils";
+import { ValueOrInputType } from "@core/value";
+import { PropertyDefinition } from "@schema/definition";
 
-export type PropertyField<T> = T extends Property<infer TProperty>
+export type PropertyField<T> = T extends PropertyDefinition<infer TProperty>
   ? ValueOrInputType<TProperty["type"]>
   : never;

@@ -1,7 +1,6 @@
-import { GetQueryCardinality, GetQueryData, Query } from "@core";
 import { FlatNarrow } from "@utils/FlatNarrow";
-import { query } from "@cypher/query";
 import { $unionSubquery } from "@cypher/stages/$unionSubquery";
+import { GetQueryCardinality, GetQueryData, Query, query_untyped } from "@core/query";
 
 export const union = <T extends Array<Query<any, any>>>(
   ...queries: FlatNarrow<T>
@@ -10,7 +9,7 @@ export const union = <T extends Array<Query<any, any>>>(
     [I in keyof T]: GetQueryData<T[I]>;
   }[number],
   GetCardinality<T>
-> => query().pipe(() => $unionSubquery("@", queries)) as Query<any, any>;
+> => query_untyped(() => $unionSubquery("@", queries));
 
 type GetCardinality<T extends Array<Query<any, any>>> = "many" extends {
   [I in keyof T]: GetQueryCardinality<T[I]>;

@@ -1,14 +1,25 @@
-import { query } from "@cypher/query";
-import { $matchNode, $where } from "@cypher/stages";
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { NodeLikeOrUnionDefinition } from "@schema/definition";
-import { MakeNodeValue } from "@cypher/types";
-import { Predicates } from "@cypher/stages/$where";
+import { $where, Predicates } from "@cypher/stages/$where";
+import { query_untyped } from "@core/query";
+import { $matchNode } from "@cypher/stages/$matchNode";
+import {
+  AbstractNodeDefinitionClass,
+  NodeDefinitionClass,
+  NodeUnionDefinitionClass,
+} from "@schema/definition";
+import { DefinitionFromClass } from "@schema/utils";
+import { Node } from "@cypher/types/structural/node";
 
-export const matchWhere = <TNode extends string | ConstructorOf<NodeLikeOrUnionDefinition>>(
+export const matchWhere = <
+  TNode extends
+    | string
+    | NodeDefinitionClass
+    | AbstractNodeDefinitionClass
+    | NodeUnionDefinitionClass,
+>(
   node: TNode,
-  predicateF: (node: MakeNodeValue<TNode>) => Predicates,
+  predicateF: (node: Node<DefinitionFromClass<TNode>>) => Predicates,
 ) =>
-  query()
-    .pipe(() => $matchNode("@", node))
-    .pipe(node => $where(predicateF(node as MakeNodeValue<TNode>)));
+  query_untyped(
+    () => $matchNode(node),
+    node => $where(predicateF(node as Node<DefinitionFromClass<TNode>>)),
+  );

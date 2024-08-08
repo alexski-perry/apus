@@ -1,13 +1,19 @@
-import { Int } from "../types";
-import { queryStage, QueryStage } from "@core/query-stage";
-import { resolveValue$ } from "@core/resolve-utils";
-import { parameterize } from "@cypher/expression/param";
+import { queryOperation, QueryOperation } from "@core/query-operation";
 import { skipClause } from "@core/clause";
+import { Int } from "@cypher/types/scalar/int";
 
-export const $skip = (val: Int | number): QueryStage<void, "same", "merge"> =>
-  queryStage({
-    outputShape: undefined,
-    clauses: [skipClause(resolveValue$(parameterize(val, Int)))],
-    cardinalityBehaviour: "same",
-    dataBehaviour: "merge",
+import { parameterize } from "@core/parameterize";
+
+export const $skip = (val: Int | number): QueryOperation<void, "same", "merge"> => {
+  return queryOperation({
+    name: "$skip",
+    resolver: resolveInfo => {
+      return {
+        clauses: [skipClause(resolveInfo.resolveValue(parameterize(val, Int)))],
+        outputShape: undefined,
+        cardinalityBehaviour: "same",
+        dataBehaviour: "merge",
+      };
+    },
   });
+};

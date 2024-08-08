@@ -1,15 +1,12 @@
-import { Query } from "@core/query";
-import { $createNode } from "@cypher/stages";
-import { Definition } from "@schema/definition";
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { query } from "@cypher/query";
-import { MakeNodeValue } from "@cypher/types";
+import { Query, query_untyped } from "@core/query";
 import { NodeCreateData } from "@cypher/mutation/utils/NodeCreateData";
+import { $createNode } from "neo4j-querier/stages";
+import { NodeDefinitionClass } from "@schema/definition";
+import { DefinitionFromClass } from "@schema/utils";
+import { Node } from "@cypher/types/structural/node";
 
-export const createNode = <
-  TNode extends string | ConstructorOf<Definition<"node" | "abstract-node">>,
->(
+export const createNode = <TNode extends string | NodeDefinitionClass>(
   node: TNode,
-  data: NodeCreateData<TNode>,
-): Query<MakeNodeValue<TNode>, "one"> =>
-  query().pipe(() => $createNode("@", node, data)) as Query<any, any>;
+  data: NodeCreateData<DefinitionFromClass<TNode>>,
+): Query<Node<DefinitionFromClass<TNode>>, "one"> =>
+  query_untyped(() => $createNode(node, data));

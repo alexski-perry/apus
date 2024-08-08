@@ -1,29 +1,23 @@
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { Definition, NodeDefinition } from "@schema/definition";
-import { Deconstruct } from "@utils/deconstruct";
-import { AllowedPropertyValue, NodeValue } from "@cypher/types";
 import { RelateToOperation } from "@cypher/mutation/operations/relate-to";
-import { Query } from "@core";
+import { Query } from "@core/query";
 import { Id } from "@utils/Id";
 import { GetCreateFieldKind } from "@cypher/mutation/utils/GetCreateFieldKind";
 import { PropertyField } from "@cypher/mutation/utils/PropertyField";
-import { Relation, RelationCardinality } from "@schema/relation";
-import { SimpleRelateToOperation } from "@cypher/mutation/operations/simple-relate-to";
+import { IsSimpleRelationship } from "@cypher/mutation/utils/IsSimpleRelationship";
+import { PropertyValue } from "@cypher/types/property";
 
-export type NodeCreateData<
-  T extends string | ConstructorOf<Definition<"node" | "abstract-node">>,
-> = T extends ConstructorOf<NodeDefinition>
-  ? TypedNodeCreateData<Deconstruct<T>>
+import { NodeDefinition, RelationCardinality, RelationDefinition } from "@schema/definition";
+import { NodeOrConcreteSubtypes } from "@schema/utils";
+
+export type NodeCreateData<T extends string | NodeDefinition> = T extends NodeDefinition
+  ? TypedNodeCreateData<T>
   : UntypedNodeCreateData;
 
 type UntypedNodeCreateData = {
-  [key: string]:
-    | AllowedPropertyValue
-    | RelateToOperation<any, any, any>
-    | Query<NodeValue, any>;
+  [key: string]: PropertyValue | RelateToOperation<any, any, any> | Query<PropertyValue, any>;
 };
 
-type TypedNodeCreateData<T extends Definition<"node" | "abstract-node">> = Id<
+type TypedNodeCreateData<T extends NodeDefinition> = Id<
   {
     [K in keyof T as GetCreateFieldKind<T[K]> extends "required-prop"
       ? K
@@ -34,28 +28,34 @@ type TypedNodeCreateData<T extends Definition<"node" | "abstract-node">> = Id<
       : never]+?: PropertyField<T[K]>;
   } & {
     [K in keyof T as GetCreateFieldKind<T[K]> extends "required-relation" ? K : never]-?:
-      | RelationField<T[K]>
+      | RelationCreateField<T[K]>
       | "auto";
   } & {
     [K in keyof T as GetCreateFieldKind<T[K]> extends "optional-relation"
       ? K
-      : never]+?: RelationField<T[K]>;
+      : never]+?: RelationCreateField<T[K]>;
   }
 >;
 
-type RelationField<T> = T extends Relation<infer TRelation>
+type RelationCreateField<T> = T extends RelationDefinition<infer TRelation>
   ?
       | RelateToOperation<
-          TRelation["to"],
+          NodeOrConcreteSubtypes<TRelation["to"]>,
           TRelation["relationship"],
-          RelationFieldCardinality<TRelation["cardinality"]>
+          RelateToCardinality<TRelation["cardinality"]>
         >
-      | SimpleRelateToOperation<TRelation>
+      | (IsSimpleRelationship<TRelation["relationship"]> extends true
+          ? RelateToOperation<
+              NodeOrConcreteSubtypes<TRelation["to"]>,
+              null,
+              RelateToCardinality<TRelation["cardinality"]>
+            >
+          : never)
   : never;
 
-type RelationFieldCardinality<TRelationCardinality extends RelationCardinality> =
+type RelateToCardinality<TRelationCardinality extends RelationCardinality> =
   TRelationCardinality extends "one"
     ? "one"
     : TRelationCardinality extends "optional"
-    ? "one" | "optional"
-    : "one" | "optional" | "many";
+      ? "one" | "optional"
+      : "one" | "optional" | "many";

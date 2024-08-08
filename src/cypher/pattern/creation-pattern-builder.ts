@@ -1,29 +1,40 @@
-import { getNodeType, MakeNodeValue, MakeRelationshipValue, NodeValue } from "@cypher/types";
 import { Id } from "@utils/Id";
-import {
-  CreationPattern,
-  CreationPatternData,
-  CreationPatternDirection,
-  IGNORED,
-  isPatternVariableDeclaration,
-  PatternOutputShape,
-  PatternVariableDeclaration,
-  QueryData,
-  ROOT_MERGE,
-  Value,
-} from "@core";
 import {
   DataMergeString,
   ExtractIdentifier,
   Identifier,
+  IGNORED,
   Ignored,
+  ROOT_MERGE,
   RootMerge,
 } from "@core/data-merge-string";
-import { Definition, NodeLikeOrUnionDefinition } from "@schema/definition";
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { getNodeLabels, getRelationshipName } from "@schema/models";
-import { getRelationshipType } from "@cypher/types/utils";
 import { StringKeys } from "@utils/StringKeys";
+import { QueryData } from "@core/query-data";
+import { Node, NodeValue } from "@cypher/types/structural/node";
+import {
+  CreationPattern,
+  CreationPatternData,
+  CreationPatternDirection,
+} from "@core/pattern/creation-pattern";
+import {
+  isPatternVariableDeclaration,
+  patternVariableDeclaration,
+  PatternVariableDeclaration,
+} from "@core/pattern/pattern-variable-declaration";
+import {
+  DefinitionFromClass,
+  getNodeLabelsForMatching,
+  getRelationshipName,
+} from "@schema/utils";
+import { PatternOutputShape } from "@core/pattern/pattern-output-shape";
+import { Value } from "@core/value";
+import {
+  AbstractNodeDefinitionClass,
+  NodeDefinitionClass,
+  NodeUnionDefinitionClass,
+  RelationshipDefinitionClass,
+} from "@schema/definition";
+import { Relationship, RelationshipValue } from "@cypher/types/structural/relationship";
 
 export const creationPattern = (): CreationPatternBuilder<void, {}> =>
   new CreationPatternBuilder({
@@ -34,7 +45,7 @@ export const creationPattern = (): CreationPatternBuilder<void, {}> =>
 
 export class CreationPatternBuilder<
   TData extends QueryData,
-  TNodeRefs extends Record<string, NodeValue>,
+  TNodeRefs extends Record<string, Node>,
 > extends CreationPattern<TData> {
   constructor(
     private patternData: CreationPatternData & {
@@ -48,20 +59,19 @@ export class CreationPatternBuilder<
   }
 
   public newNode<
-    TNode extends string | ConstructorOf<NodeLikeOrUnionDefinition>,
+    TDef extends
+      | string
+      | NodeDefinitionClass,
     TReference extends DataMergeString | PrivateReference = Ignored,
   >(
-    node: TNode,
+    node: TDef,
     reference: TReference = IGNORED as TReference,
   ): CreationPatternBuilder<
-    MergePatternOutput<TData, TReference, MakeNodeValue<TNode>>,
-    MergeNodeRefs<TNodeRefs, TReference, MakeNodeValue<TNode>>
+    MergePatternOutput<TData, TReference, Node<DefinitionFromClass<TDef>>>,
+    MergeNodeRefs<TNodeRefs, TReference, Node<DefinitionFromClass<TDef>>>
   > {
     if (reference !== IGNORED) {
-      const variableDeclaration: PatternVariableDeclaration = {
-        _kind: "variable-declaration",
-        type: getNodeType(node),
-      };
+      const variableDeclaration = patternVariableDeclaration(NodeValue.makeType(node));
 
       return new CreationPatternBuilder({
         parts: [
@@ -69,7 +79,7 @@ export class CreationPatternBuilder<
           {
             entityType: "node",
             value: variableDeclaration,
-            nodeLabels: getNodeLabels(node),
+            nodeLabels: getNodeLabelsForMatching(node),
           },
         ],
         outputShape: !isPrivateReference(reference)
@@ -88,7 +98,7 @@ export class CreationPatternBuilder<
           {
             entityType: "node",
             value: null,
-            nodeLabels: getNodeLabels(node),
+            nodeLabels: getNodeLabelsForMatching(node),
           },
         ],
         outputShape: { ...this.patternData.outputShape },
@@ -98,21 +108,20 @@ export class CreationPatternBuilder<
   }
 
   public newRelationship<
-    TRelationship extends string | ConstructorOf<Definition<"relationship">>,
-    TReference extends DataMergeString | PrivateReference = Ignored,
+    TDef extends string | RelationshipDefinitionClass,
+    TRef extends DataMergeString | PrivateReference = Ignored,
   >(
-    relationship: TRelationship,
+    relationship: TDef,
     direction: CreationPatternDirection,
-    reference: TReference = IGNORED as TReference,
+    reference: TRef = IGNORED as TRef,
   ): CreationPatternBuilder<
-    MergePatternOutput<TData, TReference, MakeRelationshipValue<TRelationship>>,
+    MergePatternOutput<TData, TRef, Relationship<DefinitionFromClass<TDef>>>,
     TNodeRefs
   > {
     if (reference !== IGNORED) {
-      const variableDeclaration: PatternVariableDeclaration = {
-        _kind: "variable-declaration",
-        type: getRelationshipType(relationship),
-      };
+      const variableDeclaration = patternVariableDeclaration(
+        RelationshipValue.makeType(relationship),
+      );
 
       return new CreationPatternBuilder({
         parts: [
@@ -240,13 +249,13 @@ type MergePatternOutput<
       } & Omit<TPreviousOutput, ExtractIdentifier<TReference>>
     >
   : TReference extends RootMerge
-  ? TValue
-  : TPreviousOutput;
+    ? TValue
+    : TPreviousOutput;
 
 type MergeNodeRefs<
-  TNodeRefs extends Record<string, NodeValue>,
+  TNodeRefs extends Record<string, Node>,
   TReference extends DataMergeString | PrivateReference,
-  TValue extends NodeValue,
+  TValue extends Node,
 > = TReference extends Ignored
   ? TNodeRefs
   : {

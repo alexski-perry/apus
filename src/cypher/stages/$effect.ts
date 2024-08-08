@@ -1,26 +1,42 @@
-import { Query, queryStage, QueryStage } from "@core";
-import { defineVariable$, resolveSubquery$, resolveValue$ } from "@core/resolve-utils";
 import { Null } from "@cypher/types/null";
-import { expression } from "@cypher/expression/core";
+import { expression } from "@core/expression";
 import { callSubqueryClause, returnClause } from "@core/clause";
-import { ClauseList } from "@core/clause-list";
+import { Query } from "@core/query";
+import { queryOperation, QueryOperation } from "@core/query-operation";
+import { Value } from "@core/value";
 
-export const $effect = (query: Query<any, any>): QueryStage<void, "same", "merge"> => {
-  const { clauses } = resolveSubquery$(query, { noReturn: true });
-  const ignoredVar = defineVariable$(Null);
+export const $effect = (query: Query<any, any>): QueryOperation<void, "same", "merge"> => {
+  return queryOperation({
+    name: "$effect",
+    resolver: resolveInfo => {
+      const { clauses } = resolveInfo.resolveSubquery(query);
 
-  return queryStage({
-    clauses: [
-      callSubqueryClause(
-        ClauseList.update(clauses, [
-          returnClause([
-            { input: resolveValue$(expression(Null)`count(null)`), output: ignoredVar },
+      // ignore 'empty' effects
+      if (clauses.length === 0) {
+        return {
+          clauses: [],
+          outputShape: undefined,
+          cardinalityBehaviour: "same",
+          dataBehaviour: "merge",
+        };
+      }
+
+      return {
+        clauses: [
+          callSubqueryClause([
+            ...clauses,
+            returnClause([
+              {
+                input: Value.getValueInfo(expression(Null)`count(null)`),
+                output: resolveInfo.defineVariable(Null),
+              },
+            ]),
           ]),
-        ]),
-      ),
-    ],
-    outputShape: undefined,
-    cardinalityBehaviour: "same",
-    dataBehaviour: "merge",
+        ],
+        outputShape: undefined,
+        cardinalityBehaviour: "same",
+        dataBehaviour: "merge",
+      };
+    },
   });
 };

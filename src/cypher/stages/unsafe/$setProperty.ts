@@ -1,23 +1,32 @@
-import { queryStage, QueryStage } from "@core/query-stage";
-import { resolveValue$, resolveVariable$ } from "@core/resolve-utils";
+import { queryOperation, QueryOperation } from "@core/query-operation";
 import { setPropertyClause } from "@core/clause";
-import { NodeUnionValue, NodeValue, RelationshipValue } from "@cypher/types";
-import { Value } from "@core";
+import { Value } from "@core/value";
+import { Node } from "@cypher/types/structural/node";
+import { Relationship } from "@cypher/types/structural/relationship";
 
 export const $setProperty = (
-  entity: NodeValue | NodeUnionValue | RelationshipValue,
+  entity: Node | Relationship,
   propertyName: string,
   value: Value,
-): QueryStage<void, "same", "merge"> =>
-  queryStage({
-    clauses: [
-      setPropertyClause({
-        entity: resolveVariable$(entity, "$setProperty entity must be a variable"),
-        propertyName,
-        value: resolveValue$(value),
-      }),
-    ],
-    outputShape: undefined,
-    cardinalityBehaviour: "same",
-    dataBehaviour: "merge",
+): QueryOperation<void, "same", "merge"> => {
+  return queryOperation({
+    name: "$setProperty",
+    resolver: resolveInfo => {
+      return {
+        clauses: [
+          setPropertyClause({
+            entity: resolveInfo.resolveVariable(
+              entity,
+              "$setProperty entity must be a variable",
+            ),
+            propertyName,
+            value: resolveInfo.resolveValue(value),
+          }),
+        ],
+        outputShape: undefined,
+        cardinalityBehaviour: "same",
+        dataBehaviour: "merge",
+      };
+    },
   });
+};

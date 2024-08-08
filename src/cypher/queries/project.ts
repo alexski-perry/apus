@@ -1,16 +1,22 @@
-import { MatchPattern, Query } from "@core";
-import { match, map, mapAndCollect } from "@cypher/queries";
 import { Mapping, ParseMapping } from "@cypher/stages/$map";
-import { List } from "@cypher/types";
-import { GetPatternCardinality, GetPatternData } from "@core/utils";
-import { ValueFromQueryData } from "@cypher/types/utils";
+import {
+  GetMatchPatternCardinality,
+  GetMatchPatternData,
+  MatchPattern,
+} from "@core/pattern/match-pattern";
+import { ValueFromQueryData } from "@core/query-data";
+import { Query } from "@core/query";
+import { mapAndCollect } from "@cypher/queries/mapAndCollect";
+import { match } from "@cypher/queries/match";
+import { map } from "@cypher/queries/map";
+import { List } from "@cypher/types/list";
 
 export const project = <
   TPattern extends MatchPattern<any, any>,
   TMapping extends Mapping<"1->1">,
 >(
   pattern: TPattern,
-  mapper: (data: GetPatternData<TPattern>) => TMapping,
+  mapper: (data: GetMatchPatternData<TPattern>) => TMapping,
 ): Query<GetProjectData<TPattern, TMapping>, "one"> => {
   const { cardinality } = MatchPattern.getData(pattern);
 
@@ -24,6 +30,6 @@ export const project = <
 type GetProjectData<
   TPattern extends MatchPattern<any, any>,
   TMapping extends Mapping<"1->1">,
-> = GetPatternCardinality<TPattern> extends "many"
+> = GetMatchPatternCardinality<TPattern> extends "many"
   ? List<ValueFromQueryData<ParseMapping<TMapping>>>
   : ParseMapping<TMapping>;

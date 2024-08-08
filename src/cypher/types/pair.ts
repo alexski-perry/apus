@@ -1,36 +1,34 @@
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { Value } from "@core/value";
-import { QueryDataOutput, QueryDataInput } from "@core/utils/query-data";
+import { GetValueInputType, GetValueOutputType, Value } from "@core/value";
 import { Neo4jValue } from "@core/neo4j-value";
-import { getDebugName, parseValue, serializeValue, setTypeInfo } from "@core/type";
+import { parseValue, serializeValue, Type, TypeOf } from "@core/type/type";
+import { getDebugName, setTypeInfo } from "@core/type/type-info";
 
 export class Pair<T1 extends Value, T2 extends Value> extends Value<
-  [QueryDataInput<T1>, QueryDataInput<T2>],
-  [QueryDataOutput<T1>, QueryDataOutput<T2>]
+  ["Pair", T1, T2],
+  [GetValueInputType<T1>, GetValueInputType<T2>],
+  [GetValueOutputType<T1>, GetValueOutputType<T2>]
 > {
-  private declare _typeInfo_pair: [T1, T2];
-
   constructor(
-    private _firstType: ConstructorOf<Value>,
-    private _secondType: ConstructorOf<Value>,
+    private _firstType: Type,
+    private _secondType: Type,
   ) {
     super();
   }
 
-  static of<T1 extends Value, T2 extends Value>(
-    firstType: ConstructorOf<T1>,
-    secondType: ConstructorOf<T2>,
-  ): ConstructorOf<Pair<T1, T2>> {
-    const pairClass = class extends Pair<T1, T2> {
+  static makeType<T1 extends Value, T2 extends Value>(
+    firstType: TypeOf<T1>,
+    secondType: TypeOf<T2>,
+  ): TypeOf<Pair<T1, T2>> {
+    const type = class extends Pair<T1, T2> {
       constructor() {
         super(firstType, secondType);
       }
     };
 
     setTypeInfo<
-      [QueryDataInput<T1>, QueryDataInput<T2>],
-      [QueryDataOutput<T1>, QueryDataOutput<T2>]
-    >(pairClass, {
+      [GetValueInputType<T1>, GetValueInputType<T2>],
+      [GetValueOutputType<T1>, GetValueOutputType<T2>]
+    >(type, {
       parseValue: (val: Neo4jValue) => {
         if (!Array.isArray(val)) return undefined;
 
@@ -64,7 +62,7 @@ export class Pair<T1 extends Value, T2 extends Value> extends Value<
       debugName: `Pair<${getDebugName(firstType)}, ${getDebugName(secondType)}>`,
     });
 
-    return pairClass;
+    return type;
   }
 
   static getTypes(pair: Pair<any, any>) {

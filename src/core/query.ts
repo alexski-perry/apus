@@ -1,73 +1,243 @@
+import { Mapping, ParseMapping } from "@cypher/stages/$map";
+import { GetQueryDataOutputType, MergeQueryData, QueryData } from "@core/query-data";
+import { QueryCardinality } from "@core/query-cardinality";
 import {
-  Cardinality,
-  QueryData,
-  QueryStage,
+  QueryOperation,
   StageCardinalityBehaviour,
   StageDataBehaviour,
-} from "@core";
-import { Mapping, ParseMapping } from "@cypher/stages/$map";
-import { MergeQueryData, QueryDataOutput } from "@core/utils";
-import { buildRootQuery } from "neo4j-querier";
-import { QueryResult } from "neo4j-driver";
-import { makeTransformer } from "neo4j-querier/build/makeTransformer";
+} from "@core/query-operation";
 
-export type QueryPipelineStage = (input: QueryData) => PipeOutput;
+export function query<
+  T1 extends QueryInput,
+  T1Data extends CalculateStageData<void, T1>,
+  T1Cardinality extends CalculateStageCardinality<"one", T1>,
+>(p1: T1): Query<T1Data, T1Cardinality>;
 
-export class Query<TData extends QueryData, TCardinality extends Cardinality> {
+export function query<
+  T1 extends QueryInput,
+  T1Data extends CalculateStageData<void, T1>,
+  T1Cardinality extends CalculateStageCardinality<"one", T1>,
+  T2 extends QueryStage<T1Data>,
+  T2Data extends CalculateStageData<T1Data, T2>,
+  T2Cardinality extends CalculateStageCardinality<T1Cardinality, T2>,
+>(p1: T1, p2: T2): Query<T2Data, T2Cardinality>;
+
+export function query<
+  T1 extends QueryInput,
+  T1Data extends CalculateStageData<void, T1>,
+  T1Cardinality extends CalculateStageCardinality<"one", T1>,
+  T2 extends QueryStage<T1Data>,
+  T2Data extends CalculateStageData<T1Data, T2>,
+  T2Cardinality extends CalculateStageCardinality<T1Cardinality, T2>,
+  T3 extends QueryStage<T2Data>,
+  T3Data extends CalculateStageData<T2Data, T3>,
+  T3Cardinality extends CalculateStageCardinality<T2Cardinality, T3>,
+>(p1: T1, p2: T2, p3: T3): Query<T3Data, T3Cardinality>;
+
+export function query<
+  T1 extends QueryInput,
+  T1Data extends CalculateStageData<void, T1>,
+  T1Cardinality extends CalculateStageCardinality<"one", T1>,
+  T2 extends QueryStage<T1Data>,
+  T2Data extends CalculateStageData<T1Data, T2>,
+  T2Cardinality extends CalculateStageCardinality<T1Cardinality, T2>,
+  T3 extends QueryStage<T2Data>,
+  T3Data extends CalculateStageData<T2Data, T3>,
+  T3Cardinality extends CalculateStageCardinality<T2Cardinality, T3>,
+  T4 extends QueryStage<T3Data>,
+  T4Data extends CalculateStageData<T3Data, T4>,
+  T4Cardinality extends CalculateStageCardinality<T3Cardinality, T4>,
+>(p1: T1, p2: T2, p3: T3, p4: T4): Query<T4Data, T4Cardinality>;
+
+export function query<
+  T1 extends QueryInput,
+  T1Data extends CalculateStageData<void, T1>,
+  T1Cardinality extends CalculateStageCardinality<"one", T1>,
+  T2 extends QueryStage<T1Data>,
+  T2Data extends CalculateStageData<T1Data, T2>,
+  T2Cardinality extends CalculateStageCardinality<T1Cardinality, T2>,
+  T3 extends QueryStage<T2Data>,
+  T3Data extends CalculateStageData<T2Data, T3>,
+  T3Cardinality extends CalculateStageCardinality<T2Cardinality, T3>,
+  T4 extends QueryStage<T3Data>,
+  T4Data extends CalculateStageData<T3Data, T4>,
+  T4Cardinality extends CalculateStageCardinality<T3Cardinality, T4>,
+  T5 extends QueryStage<T4Data>,
+  T5Data extends CalculateStageData<T4Data, T5>,
+  T5Cardinality extends CalculateStageCardinality<T4Cardinality, T5>,
+>(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): Query<T5Data, T5Cardinality>;
+
+export function query<
+  T1 extends QueryInput,
+  T1Data extends CalculateStageData<void, T1>,
+  T1Cardinality extends CalculateStageCardinality<"one", T1>,
+  T2 extends QueryStage<T1Data>,
+  T2Data extends CalculateStageData<T1Data, T2>,
+  T2Cardinality extends CalculateStageCardinality<T1Cardinality, T2>,
+  T3 extends QueryStage<T2Data>,
+  T3Data extends CalculateStageData<T2Data, T3>,
+  T3Cardinality extends CalculateStageCardinality<T2Cardinality, T3>,
+  T4 extends QueryStage<T3Data>,
+  T4Data extends CalculateStageData<T3Data, T4>,
+  T4Cardinality extends CalculateStageCardinality<T3Cardinality, T4>,
+  T5 extends QueryStage<T4Data>,
+  T5Data extends CalculateStageData<T4Data, T5>,
+  T5Cardinality extends CalculateStageCardinality<T4Cardinality, T5>,
+  T6 extends QueryStage<T5Data>,
+  T6Data extends CalculateStageData<T5Data, T6>,
+  T6Cardinality extends CalculateStageCardinality<T5Cardinality, T6>,
+>(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): Query<T6Data, T6Cardinality>;
+
+export function query<
+  T1 extends QueryInput,
+  T1Data extends CalculateStageData<void, T1>,
+  T1Cardinality extends CalculateStageCardinality<"one", T1>,
+  T2 extends QueryStage<T1Data>,
+  T2Data extends CalculateStageData<T1Data, T2>,
+  T2Cardinality extends CalculateStageCardinality<T1Cardinality, T2>,
+  T3 extends QueryStage<T2Data>,
+  T3Data extends CalculateStageData<T2Data, T3>,
+  T3Cardinality extends CalculateStageCardinality<T2Cardinality, T3>,
+  T4 extends QueryStage<T3Data>,
+  T4Data extends CalculateStageData<T3Data, T4>,
+  T4Cardinality extends CalculateStageCardinality<T3Cardinality, T4>,
+  T5 extends QueryStage<T4Data>,
+  T5Data extends CalculateStageData<T4Data, T5>,
+  T5Cardinality extends CalculateStageCardinality<T4Cardinality, T5>,
+  T6 extends QueryStage<T5Data>,
+  T6Data extends CalculateStageData<T5Data, T6>,
+  T6Cardinality extends CalculateStageCardinality<T5Cardinality, T6>,
+  T7 extends QueryStage<T6Data>,
+  T7Data extends CalculateStageData<T6Data, T7>,
+  T7Cardinality extends CalculateStageCardinality<T6Cardinality, T7>,
+>(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): Query<T7Data, T7Cardinality>;
+
+export function query(...stages: Array<QueryInput | QueryStage<any>>): Query<any, any> {
+  return new Query([...stages]);
+}
+
+export function query_untyped(
+  inputStage: QueryInput,
+  ...stages: Array<QueryStage<any>>
+): Query<any, any> {
+  return new Query([inputStage, ...stages]);
+}
+
+export type QueryStage<TInput extends QueryData> = (input: TInput) => QueryStageResult;
+export type QueryStageResult = QueryOperation<any, any, any> | Mapping<"1->1">;
+
+export type QueryInput = Query<any, any> | QueryData | QueryStage<void>;
+export type QueryInputResult = Query<any, any> | QueryData | QueryOperation<any, any, any>;
+
+export type QueryStageOrInput = QueryStage<any> | QueryInput;
+export type QueryStageOrInputResult = QueryStageResult | QueryInputResult;
+
+export type CalculateStageData<
+  TIn extends QueryData,
+  TOut extends QueryStageOrInput,
+> = TOut extends (...args: any[]) => QueryStageOrInputResult
+  ? CalculateStageDataHelper<TIn, ReturnType<TOut>>
+  : TOut extends QueryStageOrInputResult
+    ? CalculateStageDataHelper<TIn, TOut>
+    : never;
+
+type CalculateStageDataHelper<
+  TIn extends QueryData,
+  TOut extends QueryStageOrInputResult,
+> = TOut extends Mapping<"1->1">
+  ? ParseMapping<TOut>
+  : TOut extends Query<infer TData, QueryCardinality>
+    ? TData
+    : TOut extends QueryOperation<infer TData, StageCardinalityBehaviour, infer TType>
+      ? TType extends "merge"
+        ? MergeQueryData<TIn, TData>
+        : TData
+      : never;
+
+export type CalculateStageCardinality<
+  TIn extends QueryCardinality,
+  TOut extends QueryStage<any> | QueryInput,
+> = TOut extends (...args: any[]) => QueryStageResult | QueryInputResult
+  ? CalculateStageCardinalityHelper<TIn, ReturnType<TOut>>
+  : TOut extends QueryStageResult | QueryInputResult
+    ? CalculateStageCardinalityHelper<TIn, TOut>
+    : never;
+
+type CalculateStageCardinalityHelper<
+  TIn extends QueryCardinality,
+  TOut extends QueryStageResult | QueryInputResult,
+> = TOut extends Mapping<"1->1">
+  ? TIn
+  : TOut extends Query<QueryData, infer TCardinality>
+    ? {
+        one: TIn;
+        "none-or-one": {
+          one: "none-or-one";
+          "none-or-one": "none-or-one";
+          many: "many";
+        }[TIn];
+        many: "many";
+      }[TCardinality]
+    : TOut extends QueryOperation<QueryData, infer TCardinalityBehaviour, StageDataBehaviour>
+      ? {
+          same: TIn;
+          optional: {
+            one: "none-or-one";
+            "none-or-one": "none-or-one";
+            many: "many";
+          }[TIn];
+          "force-none-or-one": "none-or-one";
+          "force-one": "one";
+          "force-many": "many";
+        }[TCardinalityBehaviour]
+      : never;
+
+export class Query<TData extends QueryData, TCardinality extends QueryCardinality> {
   private declare _type: [TData, TCardinality];
 
-  constructor(
-    private _data: {
-      input: QueryData; // if an input exists, will be a subquery
-      stages: Array<QueryPipelineStage>;
-    },
-  ) {}
+  constructor(private _stages: Array<QueryStageOrInput>) {}
 
-  public pipe<T extends PipeOutput>(
-    pipe: (input: TData) => T,
-  ): Query<CalculateData<TData, T>, CalculateCardinality<TCardinality, T>> {
-    const current = this._data;
-    return new Query({
-      input: current.input,
-      stages: [...current.stages, pipe as unknown as (input: QueryData) => PipeOutput],
-    });
-  }
+  static resolve(query: Query<any, any>): QueryInfo {
+    let stages = query._stages;
+    let input: QueryData = undefined;
 
-  public build() {
-    return buildRootQuery(this);
-  }
+    const [inputStage, ...laterStages] = query._stages;
+    if (inputStage instanceof Query) {
+      const { input: innerInput, stages: innerStages } = Query.resolve(inputStage);
+      input = innerInput;
+      stages = [...innerStages, ...laterStages];
+    } else if (typeof inputStage !== "function") {
+      input = inputStage;
+      stages = laterStages;
+    }
 
-  public async run(
-    executor: (queryString: string, params: Record<string, any>) => Promise<QueryResult>,
-  ): Promise<GetQueryOutput<TData, TCardinality>> {
-    const start = performance.now();
-
-    const { params, queryString, outputShape, cardinality } = buildRootQuery(this);
-    const transformer = makeTransformer({ outputShape, cardinality });
-    const buildEnd = performance.now();
-    const queryResult = executor(queryString, params);
-
-    const end = performance.now();
-    console.log(`BUILD TIME: ${buildEnd - start}ms`);
-    console.log(`TOTAL EXECUTION TIME: ${end - start}ms`);
-    return transformer(await queryResult);
-  }
-
-  static getData(query: Query<any, any>) {
-    return query._data;
+    return { input, stages: stages as Array<QueryStage<any>> };
   }
 }
 
-/*
-   HELPER TYPES
+export interface QueryInfo {
+  input: QueryData;
+  stages: Array<QueryStage<any>>;
+}
+
+/**
+ * Calculates the output type of the query
  */
+export type GetQueryOutput<
+  TData extends QueryData,
+  TCardinality extends QueryCardinality,
+> = TCardinality extends "many"
+  ? Array<GetQueryDataOutputType<TData>>
+  : TCardinality extends "optional"
+    ? GetQueryDataOutputType<TData> | undefined
+    : GetQueryDataOutputType<TData>;
 
 /**
  * Extracts the first generic parameter 'TData' of the Query<TData, TCardinality> type
  */
 export type GetQueryData<T extends Query<any, any>> = T extends Query<
   infer TData extends QueryData,
-  Cardinality
+  QueryCardinality
 >
   ? TData
   : never;
@@ -77,60 +247,7 @@ export type GetQueryData<T extends Query<any, any>> = T extends Query<
  */
 export type GetQueryCardinality<T extends Query<any, any>> = T extends Query<
   QueryData,
-  infer TCardinality extends Cardinality
+  infer TCardinality extends QueryCardinality
 >
   ? TCardinality
-  : never;
-
-export type GetQueryOutput<
-  TData extends QueryData,
-  TCardinality extends Cardinality,
-> = TCardinality extends "many" ? Array<QueryDataOutput<TData>> : QueryDataOutput<TData>;
-
-/*
-   INTERNAL TYPES
- */
-
-type PipeOutput = Mapping<"1->1"> | QueryStage<any, any, any>;
-
-type CalculateData<
-  TIn extends QueryData,
-  TOut extends PipeOutput,
-> = TOut extends Mapping<"1->1">
-  ? ParseMapping<TOut>
-  : TOut extends Query<infer TData, Cardinality>
-  ? TData
-  : TOut extends QueryStage<infer TData, StageCardinalityBehaviour, infer TType>
-  ? TType extends "merge"
-    ? MergeQueryData<TIn, TData>
-    : TData
-  : never;
-
-type CalculateCardinality<
-  TCardinalityIn extends Cardinality,
-  TOut extends PipeOutput,
-> = TOut extends Mapping<"1->1">
-  ? TCardinalityIn
-  : TOut extends Query<QueryData, infer TCardinality>
-  ? {
-      one: TCardinalityIn;
-      "none-or-one": {
-        one: "none-or-one";
-        "none-or-one": "none-or-one";
-        many: "many";
-      }[TCardinalityIn];
-      many: "many";
-    }[TCardinality]
-  : TOut extends QueryStage<QueryData, infer TCardinalityBehaviour, StageDataBehaviour>
-  ? {
-      same: TCardinalityIn;
-      optional: {
-        one: "none-or-one";
-        "none-or-one": "none-or-one";
-        many: "many";
-      }[TCardinalityIn];
-      "force-none-or-one": "none-or-one";
-      "force-one": "one";
-      "force-many": "many";
-    }[TCardinalityBehaviour]
   : never;

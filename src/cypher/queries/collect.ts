@@ -1,9 +1,9 @@
-import { Query, QueryData } from "@core";
-import { $collect } from "@cypher/stages";
-import { List } from "@cypher/types";
-import { ValueFromQueryData } from "@cypher/types/utils";
+import { QueryData, ValueFromQueryData } from "@core/query-data";
+import { Query, query_untyped } from "@core/query";
+import { List } from "@cypher/types/list";
+import { $collect } from "@cypher/stages/$collect";
 
 export const collect = <TData extends Exclude<QueryData, void>>(
-  query: Query<TData, any>,
+  inputQuery: Query<TData, any>,
 ): Query<List<ValueFromQueryData<TData>>, "one"> =>
-  query.pipe(data => $collect(data)) as Query<any, any>;
+  query_untyped(inputQuery, data => $collect(data));

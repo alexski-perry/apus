@@ -3,23 +3,25 @@ import {
   ClauseMapping,
   ClauseOrdering,
   CreateClausePattern,
-  MatchPattern,
+  MatchClausePattern,
   ProcedureResult,
 } from "@core/clause";
 import { castArray } from "@utils/castArray";
-import { ValueData, Variable } from "@core/value-data";
-import { ParamRegistry } from "neo4j-querier/build/param-registry";
+import { ValueInfo, Variable } from "@core/value-info";
+import { ParamRegistry } from "@build/param-registry";
+import { simplifyClauses } from "@build/simplifyClauses";
 
-export const printClauses = (
+export function printClauses(
   clauses: Clause[],
   level: number,
   paramRegistry: ParamRegistry,
-): string[] => {
+): string[] {
+  const simplifiedClauses = simplifyClauses(clauses);
   const lines: string[] = [];
 
   const printIndent = (level: number) => "  ".repeat(level);
 
-  const printValue = (value: ValueData): string => {
+  const printValue = (value: ValueInfo): string => {
     switch (value.kind) {
       case "variable":
         return printVariable(value);
@@ -33,7 +35,7 @@ export const printClauses = (
     }
   };
 
-  const printValueList = (values: ValueData[]) =>
+  const printValueList = (values: ValueInfo[]) =>
     values.map(value => printValue(value)).join(", ");
 
   const printMappingList = (mappings: ClauseMapping[]) =>
@@ -51,7 +53,10 @@ export const printClauses = (
   const printYieldsList = (yieldsList: ProcedureResult[]) =>
     yieldsList.map(result => `${result.name} AS ${printValue(result.output)}`).join(", ");
 
-  const printPattern = (pattern: MatchPattern | CreateClausePattern) => {
+  function printPattern(
+    pattern: MatchClausePattern | CreateClausePattern,
+    kind: "match" | "create",
+  ) {
     const parts: string[] = [];
     let lastPartType: "node" | "relationship" | null = null;
 
@@ -61,7 +66,8 @@ export const printClauses = (
         part.entityType === "node"
           ? castArray(part.nodeLabels ?? [])
           : castArray(part.relationshipNames ?? []);
-      const entityNameString = entityNames.length > 0 ? `:${entityNames.join("|")}` : "";
+      const entityNameString =
+        entityNames.length > 0 ? `:${entityNames.join(kind === "match" ? "|" : ":")}` : "";
 
       if (part.entityType === "node") {
         if (lastPartType === "node") {
@@ -81,8 +87,8 @@ export const printClauses = (
           part.direction === "->"
             ? `-${inner}->`
             : part.direction === "<-"
-            ? `<-${inner}-`
-            : `-${inner}-`,
+              ? `<-${inner}-`
+              : `-${inner}-`,
         );
         lastPartType = "relationship";
       }
@@ -93,32 +99,34 @@ export const printClauses = (
     }
 
     return parts.join("");
-  };
+  }
 
   const addLine = (line: string, options?: { noIndent?: boolean }) => {
     lines.push(printIndent(options?.noIndent ? 0 : level) + line);
   };
 
-  clauses.forEach(clause => {
+  simplifiedClauses.forEach(clause => {
     switch (clause.type) {
       case "MATCH":
         addLine(
           `${clause.isOptional ? "OPTIONAL MATCH" : "MATCH"} ${clause.patterns
-            .map(printPattern)
+            .map(pattern => printPattern(pattern, "match"))
             .join(", ")}`,
         );
         break;
       case "IMPORT WITH":
         addLine(`WITH ${printValueList(clause.variables)}`);
         break;
-      case "WILDCARD WITH":
-        addLine("WITH *");
-        break;
       case "WITH":
+        const withMappingsListStr = printMappingList(clause.mappings);
         addLine(
-          `${clause.isDistinct ? "WITH DISTINCT" : "WITH"} ${printMappingList(
-            clause.mappings,
-          )}`,
+          `${clause.isDistinct ? "WITH DISTINCT" : "WITH"} ${
+            clause.hasWildcard && withMappingsListStr.length > 0
+              ? "*, "
+              : clause.hasWildcard
+                ? "*"
+                : ""
+          }${withMappingsListStr}`,
         );
         break;
       case "RETURN":
@@ -159,7 +167,11 @@ export const printClauses = (
         }
         break;
       case "CREATE":
-        addLine(`CREATE ${clause.patterns.map(printPattern).join(", ")}`);
+        addLine(
+          `CREATE ${clause.patterns
+            .map(pattern => printPattern(pattern, "create"))
+            .join(", ")}`,
+        );
         break;
       case "DELETE":
         addLine(
@@ -175,7 +187,7 @@ export const printClauses = (
         break;
       case "CALL SUBQUERY":
         addLine(`CALL {`);
-        printClauses(clause.clauses.getClauses(), level + 1, paramRegistry).forEach(line => {
+        printClauses(clause.clauses, level + 1, paramRegistry).forEach(line => {
           addLine(line, { noIndent: true });
         });
         addLine(`}`);
@@ -185,11 +197,9 @@ export const printClauses = (
 
         clause.subqueries.forEach((subqueryClauses, i) => {
           const isLast = clause.subqueries.length - 1 === i;
-          printClauses(subqueryClauses.getClauses(), level + 1, paramRegistry).forEach(
-            line => {
-              addLine(line, { noIndent: true });
-            },
-          );
+          printClauses(subqueryClauses, level + 1, paramRegistry).forEach(line => {
+            addLine(line, { noIndent: true });
+          });
           if (!isLast) {
             addLine("  UNION");
           }
@@ -203,6 +213,6 @@ export const printClauses = (
   });
 
   return lines;
-};
+}
 
 export const printVariable = (variable: Variable) => `var${variable.index}`;

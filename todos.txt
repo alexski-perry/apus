@@ -1,50 +1,36 @@
 
 CRITICAL
-- deleting subtypes
-- yielding from procedure
-- standard functions/procedures/aggregations
-- better conditional logic (at runtime level - i.e. to produce different queries)
+- proper serialisation/parsing of Union
+- GraphNodeUnion helper methods (i.e. mapBySubtype)
+- matchRelationBySubtype
 
 FEATURES
-- clear() relation operation
 - relateToDynamic() relation operation
     - allows you to set relationship properties per node being connected (via callback fn)
 
 IMPROVEMENTS
-- add more runtime validation throughout query building (especially mutations)
+- allow using older versions of Cypher
 - add custom exception types
-- deep merging of query data [probably critical]
-
-NEEDS INVESTIGATION
-- parameterized queries (for performance), for example:
-    -  const allBlogPosts = makeQuery(() =>
-         start()
-           .pipe(() => $matchNode(":bp", BlogPost))
-           .pipe(({ bp }) => $map(params.name)),
-       );
-    -  const getBlogPost = makeQuery({id: String}, (params) =>
-         findByID(BlogPost, params.id)
-            .pipe(bp => ({
-                title: bp.title,
-                age:   bp.age
-            })
-        )
-      );
-
+- deep merging of query data
+- utilities to help better conditional logic (at runtime level - i.e. to produce different queries)
+- remove superfluous RETURN count(null)
 
 OTHER NOTES:
 
-  SUMMARY OF RELATION OPERATIONS:
+  SUMMARY OF $updateNode() OPERATIONS:
       one
         - relateTo<one>() (provided node must be found)
-        - replace() (if provided node not found, not action taken)
+        - replace() (if provided node not found, no action taken)
 
       optional
-        - relateTo<one | optional>() (if provided node not found, disconnected)
-        - replace() (if provided node not found, no action taken)
+        - relateTo<one | optional>() (if provided node not found, no action taken)
+        - replace() (if provided node not found, no action take)
+        - replaceOrRemove() (if provided not found, still disconnect)
         - remove()
 
       many (array):
         - relateTo<any>()
         - disconnect()
-        - clear()
+        - disconnectStrict() (error if trying to disconnect something not connected)
+        - disconnectAll()
+        - replace() (combination of disconnectAll followed by relateTo())

@@ -1,11 +1,13 @@
-import { Query, Cardinality, QueryData } from "@core";
 import { Mapping, ParseMapping } from "../stages/$map";
+import { QueryData } from "@core/query-data";
+import { QueryCardinality } from "@core/query-cardinality";
+import { Query, query_untyped } from "@core/query";
 
 export const map = <
   TDataIn extends QueryData,
   TMapping extends Mapping<"1->1">,
-  TCard extends Cardinality,
+  TCardinality extends QueryCardinality,
 >(
-  query: Query<TDataIn, TCard>,
+  inputQuery: Query<TDataIn, TCardinality>,
   map: (data: TDataIn) => TMapping,
-): Query<ParseMapping<TMapping>, TCard> => query.pipe(out => map(out)) as Query<any, any>;
+): Query<ParseMapping<TMapping>, TCardinality> => query_untyped(inputQuery, data => map(data));

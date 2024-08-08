@@ -1,88 +1,57 @@
-import {
-  DisconnectOperation,
-  RelationOperation,
-  RemoveOperation,
-  ReplaceOperation,
-} from "@cypher/mutation";
-import { AllowedPropertyValue, GraphNode, NodeValue } from "@cypher/types";
-import { Query, QueryStage } from "@core";
-import { loadNodeLikeModel } from "@schema/models";
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { Relation, RelationTypeInfo } from "@schema/relation";
-import { Definition } from "@schema/definition";
-import { Deconstruct } from "@utils/deconstruct";
-import { Id } from "@utils/Id";
-import { PropertyField } from "@cypher/mutation/utils/PropertyField";
-import { GetUpdateFieldKind } from "@cypher/mutation/utils/GetUpdateFieldKind";
-import { RelateToOperation } from "@cypher/mutation/operations/relate-to";
-import { SimpleRelateToOperation } from "@cypher/mutation/operations/simple-relate-to";
-import { $handleMutation } from "@cypher/mutation/utils/$handleMutation";
-import { typeOf } from "@core/utils";
-import { getDebugName } from "@core/type";
+import { ExtractNodeDefinition, Node, NodeValue } from "@cypher/types/structural/node";
+import { queryOperation, QueryOperation } from "@core/query-operation";
+import { NodeUpdateData } from "@cypher/mutation/utils/NodeUpdateData";
+import { maybeLoadModel } from "@schema/utils";
+import { AbstractNodeDefinition, NodeDefinition } from "@schema/definition";
+import { handleMutation } from "@cypher/mutation/utils/handleMutation";
+import { Value } from "@core/value";
+import { isVariable } from "@core/value-info";
 
-export const $updateNode = <TNode extends NodeValue>(
+export const $updateNode = <
+  TNode extends Node<string | NodeDefinition | AbstractNodeDefinition>,
+>(
   node: TNode,
-  data: NodeUpdateData<TNode extends GraphNode<infer TDef> ? ConstructorOf<TDef> : string>,
-): QueryStage<void, "same", "merge"> => {
-  const nodeDef = NodeValue.getDefinition(node);
-  console.log({ node, nodeDef, type: getDebugName(typeOf(node)) });
-  const entityModel = typeof nodeDef === "string" ? null : loadNodeLikeModel(nodeDef);
+  data: NodeUpdateData<ExtractNodeDefinition<TNode>>,
+): QueryOperation<void, "same", "merge"> => {
+  return queryOperation({
+    name: "$updateNode",
+    resolver: resolveInfo => {
+      const definition = NodeValue.getDefinition(node);
+      const model = maybeLoadModel(definition);
 
-  return $handleMutation({
-    entityModel,
-    entityValue: node,
-    data,
-    mutationType: "update",
+      if (model?.kind === "NodeUnion") throw new Error("Can't use $updateNode on node union");
+
+      const variable = resolveInfo.resolveVariable(node, "$updateNode expected variable");
+
+      const mutationClauses = handleMutation({
+        targetVariable: variable,
+        entityModel: model,
+        data,
+        mutationType: "update",
+        resolveInfo,
+      });
+
+      return {
+        outputShape: undefined,
+        clauses: mutationClauses,
+        cardinalityBehaviour: "same",
+        dataBehaviour: "merge",
+      };
+    },
   });
+
+  // return queryOperationFromQuery(
+  //   "$updateNode",
+  //   query(() =>
+  //     $effect(
+  //       handleMutation({
+  //         entityModel,
+  //         entityValue: node,
+  //         data,
+  //         mutationType: "update",
+  //         providedData: {},
+  //       }),
+  //     ),
+  //   ),
+  // );
 };
-
-/*
-  INTERNAL TYPES
- */
-
-type NodeUpdateData<
-  T extends string | ConstructorOf<Definition<"node" | "abstract-node" | "node-interface">>,
-> = T extends ConstructorOf<any> ? TypedNodeUpdateData<Deconstruct<T>> : UntypedNodeUpdateData;
-
-type UntypedNodeUpdateData = {
-  [key: string]: AllowedPropertyValue | RelationOperation | Query<NodeValue, any>;
-};
-
-type TypedNodeUpdateData<T extends Definition<"node" | "abstract-node" | "node-interface">> =
-  Id<
-    {
-      [K in keyof T as GetUpdateFieldKind<T[K]> extends "prop" ? K : never]+?: PropertyField<
-        T[K]
-      >;
-    } & {
-      [K in keyof T as GetUpdateFieldKind<T[K]> extends "relation"
-        ? K
-        : never]+?: RelationUpdateField<T[K]>;
-    }
-  >;
-
-type RelationUpdateField<T> = T extends Relation<infer TRelation>
-  ? TRelation["cardinality"] extends "one"
-    ? RelationUpdateField_One<TRelation>
-    : TRelation["cardinality"] extends "optional"
-    ? RelationUpdateField_Optional<TRelation>
-    : TRelation["cardinality"] extends "many"
-    ? RelationUpdateField_Many<TRelation> | Array<RelationUpdateField_Many<TRelation>>
-    : never
-  : never;
-
-type RelationUpdateField_One<TRelation extends RelationTypeInfo> =
-  | RelateToOperation<TRelation["to"], TRelation["relationship"], "one">
-  | SimpleRelateToOperation<TRelation>
-  | ReplaceOperation<TRelation["to"], TRelation["relationship"]>;
-
-type RelationUpdateField_Optional<TRelation extends RelationTypeInfo> =
-  | RelateToOperation<TRelation["to"], TRelation["relationship"], "one" | "optional">
-  | SimpleRelateToOperation<TRelation>
-  | ReplaceOperation<TRelation["to"], TRelation["relationship"]>
-  | RemoveOperation;
-
-type RelationUpdateField_Many<TRelation extends RelationTypeInfo> =
-  | RelateToOperation<TRelation["to"], TRelation["relationship"], "one" | "optional" | "many">
-  | SimpleRelateToOperation<TRelation>
-  | DisconnectOperation<TRelation["to"]>;

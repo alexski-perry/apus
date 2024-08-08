@@ -1,36 +1,43 @@
-import {
-  getNodeType,
-  MakeNodeValue,
-  MakeRelationshipValue,
-  NodeUnionValue,
-  NodeValue,
-  RelationshipValue,
-} from "@cypher/types";
 import { Id } from "@utils/Id";
-import {
-  IGNORED,
-  isPatternVariableDeclaration,
-  MatchPattern,
-  MatchPatternData,
-  MatchPatternDirection,
-  PatternOutputShape,
-  PatternVariableDeclaration,
-  QueryData,
-  ROOT_MERGE,
-  Value,
-} from "@core";
 import {
   DataMergeString,
   ExtractIdentifier,
   Identifier,
+  IGNORED,
   Ignored,
+  ROOT_MERGE,
   RootMerge,
 } from "@core/data-merge-string";
-import { Definition, NodeLikeOrUnionDefinition } from "@schema/definition";
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { getNodeLabels, getRelationshipName } from "@schema/models";
-import { getRelationshipType } from "@cypher/types/utils";
 import { StringKeys } from "@utils/StringKeys";
+import { QueryData } from "@core/query-data";
+import { Node, NodeValue } from "@cypher/types/structural/node";
+import { Relationship, RelationshipValue } from "@cypher/types/structural/relationship";
+import {
+  MatchPattern,
+  MatchPatternData,
+  MatchPatternDirection,
+  MatchPatternNodeValue,
+} from "@core/pattern/match-pattern";
+import {
+  isPatternVariableDeclaration,
+  patternVariableDeclaration,
+  PatternVariableDeclaration,
+} from "@core/pattern/pattern-variable-declaration";
+import { PatternOutputShape } from "@core/pattern/pattern-output-shape";
+import { Value } from "@core/value";
+import {
+  AbstractNodeDefinitionClass,
+  AbstractRelationshipDefinitionClass,
+  NodeDefinitionClass,
+  NodeUnionDefinitionClass,
+  RelationshipDefinitionClass,
+  RelationshipUnionDefinitionClass,
+} from "@schema/definition";
+import {
+  DefinitionFromClass,
+  getNodeLabelsForMatching,
+  getConcreteRelationshipNames,
+} from "@schema/utils";
 
 // todo implement named paths
 export const pattern = (): MatchPatternBuilder<void, {}, {}> =>
@@ -43,8 +50,8 @@ export const pattern = (): MatchPatternBuilder<void, {}, {}> =>
 
 export class MatchPatternBuilder<
   TData extends QueryData,
-  TNodeRefs extends Record<string, NodeValue>,
-  TRelRefs extends Record<string, RelationshipValue>,
+  TNodeRefs extends Record<string, Node>,
+  TRelRefs extends Record<string, Relationship>,
 > extends MatchPattern<TData, "many"> {
   constructor(
     private patternData: Omit<MatchPatternData, "cardinality"> & {
@@ -60,21 +67,22 @@ export class MatchPatternBuilder<
   }
 
   public newNode<
-    TNode extends string | ConstructorOf<NodeLikeOrUnionDefinition>,
+    TNode extends
+      | string
+      | NodeDefinitionClass
+      | AbstractNodeDefinitionClass
+      | NodeUnionDefinitionClass,
     TReference extends DataMergeString | PrivateReference = Ignored,
   >(
     node: TNode,
     reference: TReference = IGNORED as TReference,
   ): MatchPatternBuilder<
-    MergePatternOutput<TData, TReference, MakeNodeValue<TNode>>,
-    MergeNodeRefs<TNodeRefs, TReference, MakeNodeValue<TNode>>,
+    MergePatternOutput<TData, TReference, Node<DefinitionFromClass<TNode>>>,
+    MergeNodeRefs<TNodeRefs, TReference, Node<DefinitionFromClass<TNode>>>,
     TRelRefs
   > {
     if (reference !== IGNORED) {
-      const variableDeclaration: PatternVariableDeclaration = {
-        _kind: "variable-declaration",
-        type: getNodeType(node),
-      };
+      const variableDeclaration = patternVariableDeclaration(NodeValue.makeType(node));
 
       return new MatchPatternBuilder({
         parts: [
@@ -82,7 +90,7 @@ export class MatchPatternBuilder<
           {
             entityType: "node",
             value: variableDeclaration,
-            nodeLabels: getNodeLabels(node),
+            nodeLabels: getNodeLabelsForMatching(node),
           },
         ],
         outputShape: !isPrivateReference(reference)
@@ -102,7 +110,7 @@ export class MatchPatternBuilder<
           {
             entityType: "node",
             value: null,
-            nodeLabels: getNodeLabels(node),
+            nodeLabels: getNodeLabelsForMatching(node),
           },
         ],
         outputShape: { ...this.patternData.outputShape },
@@ -113,21 +121,25 @@ export class MatchPatternBuilder<
   }
 
   public newRelationship<
-    TRelationship extends string | ConstructorOf<Definition<"relationship">>,
+    TRelationship extends
+      | string
+      | RelationshipDefinitionClass
+      | AbstractRelationshipDefinitionClass
+      | RelationshipUnionDefinitionClass,
     TReference extends DataMergeString | PrivateReference = Ignored,
   >(
     relationship: TRelationship,
     direction: MatchPatternDirection,
     reference: TReference = IGNORED as TReference,
   ): MatchPatternBuilder<
-    MergePatternOutput<TData, TReference, MakeRelationshipValue<TRelationship>>,
+    MergePatternOutput<TData, TReference, Relationship<DefinitionFromClass<TRelationship>>>,
     TNodeRefs,
-    MergeRelRefs<TRelRefs, TReference, MakeRelationshipValue<TRelationship>>
+    MergeRelRefs<TRelRefs, TReference, Relationship<DefinitionFromClass<TRelationship>>>
   > {
     if (reference !== IGNORED) {
       const variableDeclaration: PatternVariableDeclaration = {
         _kind: "variable-declaration",
-        type: getRelationshipType(relationship),
+        type: RelationshipValue.makeType(relationship),
       };
 
       return new MatchPatternBuilder({
@@ -137,7 +149,7 @@ export class MatchPatternBuilder<
             entityType: "relationship",
             direction,
             value: variableDeclaration,
-            relationshipNames: [getRelationshipName(relationship)],
+            relationshipNames: getConcreteRelationshipNames(relationship),
           },
         ],
         outputShape: !isPrivateReference(reference)
@@ -158,7 +170,7 @@ export class MatchPatternBuilder<
             entityType: "relationship",
             direction,
             value: null,
-            relationshipNames: [getRelationshipName(relationship)],
+            relationshipNames: getConcreteRelationshipNames(relationship),
           },
         ],
         outputShape: { ...this.patternData.outputShape },
@@ -169,20 +181,16 @@ export class MatchPatternBuilder<
   }
 
   public node(
-    nodeRef: StringKeys<TNodeRefs> | NodeValue | NodeUnionValue,
+    nodeRef: StringKeys<TNodeRefs> | MatchPatternNodeValue,
   ): MatchPatternBuilder<TData, TNodeRefs, TRelRefs> {
-    if (nodeRef instanceof NodeValue || nodeRef instanceof NodeUnionValue) {
+    if (nodeRef instanceof Value) {
       return new MatchPatternBuilder({
         parts: [
           ...this.patternData.parts,
           {
             entityType: "node",
             value: nodeRef,
-            nodeLabels: getNodeLabels(
-              nodeRef instanceof NodeValue
-                ? NodeValue.getDefinition(nodeRef)
-                : NodeUnionValue.getDefinition(nodeRef),
-            ),
+            nodeLabels: [],
           },
         ],
         outputShape: { ...this.patternData.outputShape },
@@ -221,7 +229,7 @@ export class MatchPatternBuilder<
             entityType: "relationship",
             direction,
             value: relRef,
-            relationshipNames: [getRelationshipName(RelationshipValue.getDefinition(relRef))],
+            relationshipNames: [],
           },
         ],
         outputShape: { ...this.patternData.outputShape },
@@ -306,13 +314,13 @@ type MergePatternOutput<
       } & Omit<TPreviousOutput, ExtractIdentifier<TReference>>
     >
   : TReference extends RootMerge
-  ? TValue
-  : TPreviousOutput;
+    ? TValue
+    : TPreviousOutput;
 
 type MergeNodeRefs<
-  TNodeRefs extends Record<string, NodeValue>,
+  TNodeRefs extends Record<string, Node>,
   TReference extends DataMergeString | PrivateReference,
-  TValue extends NodeValue,
+  TValue extends Node,
 > = TReference extends Ignored
   ? TNodeRefs
   : {

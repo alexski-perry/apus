@@ -1,10 +1,9 @@
-import { Property } from "@schema/property";
-import { Relation } from "@schema/relation";
+import { PropertyDefinition, RelationDefinition } from "@schema/definition";
 
-export type GetUpdateFieldKind<T> = T extends Property<infer TProperty>
+export type GetUpdateFieldKind<T> = T extends PropertyDefinition<infer TProperty>
   ? TProperty["updateStrategy"] extends "not-allowed" | "autogen"
     ? "none"
     : "prop"
-  : T extends Relation<any>
-  ? "relation"
-  : "none";
+  : T extends RelationDefinition<any>
+    ? "relation"
+    : "none";

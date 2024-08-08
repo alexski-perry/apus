@@ -1,36 +1,22 @@
-import { Value } from "@core/value";
-import {
-  AllowedPropertyValue,
-  Boolean,
-  BooleanValue,
-  Float,
-  FloatValue,
-  GraphNode,
-  Int,
-  IntValue,
-  NodeUnionValue,
-  NodeValue,
-  RelationshipValue,
-  String,
-  StringValue,
-} from "@cypher/types";
-import { ValueOrInputType } from "@core/utils/value";
-import { List, Optional } from "@cypher/types";
-import { AnyProperty } from "@cypher/types/property-types/any-property";
-import { parameterize } from "@cypher/expression/param";
-import { expression } from "@cypher/expression/core";
-import { Type, TypeOf } from "@core/type";
-import { NodeLikeDefinition } from "@schema/definition";
-import { loadNodeLikeModel } from "@schema/models";
-import { Property } from "@schema/property";
+import { Value, ValueOrInputType } from "@core/value";
+import { expression, expressionDynamic } from "@core/expression";
+import { Type } from "@core/type/type";
+import { Int, IntValue } from "@cypher/types/scalar/int";
+import { Float, FloatValue } from "@cypher/types/scalar/float";
+import { Boolean, BooleanValue } from "@cypher/types/scalar/boolean";
+import { String, StringValue } from "@cypher/types/scalar/string";
+import { NodeValue } from "@cypher/types/structural/node";
+import { Optional } from "@cypher/types/optional";
+import { List } from "@cypher/types/list";
+import { parameterize } from "@core/parameterize";
 
 /*
   MATHS OPERATIONS
  */
 
 export const add = <
-  T1 extends IntValue<any, any> | FloatValue<any>,
-  T2 extends IntValue<any, any> | FloatValue<any>,
+  T1 extends IntValue<any> | FloatValue<any>,
+  T2 extends IntValue<any> | FloatValue<any>,
 >(
   val1: T1,
   val2: T2,
@@ -41,8 +27,8 @@ export const add = <
 };
 
 export const minus = <
-  T1 extends IntValue<any, any> | FloatValue<any>,
-  T2 extends IntValue<any, any> | FloatValue<any>,
+  T1 extends IntValue<any> | FloatValue<any>,
+  T2 extends IntValue<any> | FloatValue<any>,
 >(
   val1: T1,
   val2: T2,
@@ -53,8 +39,8 @@ export const minus = <
 };
 
 export const multiply = <
-  T1 extends IntValue<any, any> | FloatValue<any>,
-  T2 extends IntValue<any, any> | FloatValue<any>,
+  T1 extends IntValue<any> | FloatValue<any>,
+  T2 extends IntValue<any> | FloatValue<any>,
 >(
   val1: T1,
   val2: T2,
@@ -65,8 +51,8 @@ export const multiply = <
 };
 
 export const divide = <
-  T1 extends IntValue<any, any> | FloatValue<any>,
-  T2 extends IntValue<any, any> | FloatValue<any>,
+  T1 extends IntValue<any> | FloatValue<any>,
+  T2 extends IntValue<any> | FloatValue<any>,
 >(
   val1: T1,
   val2: T2,
@@ -77,8 +63,8 @@ export const divide = <
 };
 
 export const modulo = <
-  T1 extends IntValue<any, any> | FloatValue<any>,
-  T2 extends IntValue<any, any> | FloatValue<any>,
+  T1 extends IntValue<any> | FloatValue<any>,
+  T2 extends IntValue<any> | FloatValue<any>,
 >(
   val1: T1,
   val2: T2,
@@ -89,8 +75,8 @@ export const modulo = <
 };
 
 export const exponentiate = <
-  T1 extends IntValue<any, any> | FloatValue<any>,
-  T2 extends IntValue<any, any> | FloatValue<any>,
+  T1 extends IntValue<any> | FloatValue<any>,
+  T2 extends IntValue<any> | FloatValue<any>,
 >(
   num: T1,
   exponent: T2,
@@ -100,7 +86,7 @@ export const exponentiate = <
   return expression(outputType)`(${num} ^ ${exponent})` as any;
 };
 
-export const negate = <T1 extends IntValue<any, any> | FloatValue<any>>(
+export const negate = <T1 extends IntValue<any> | FloatValue<any>>(
   num: T1,
 ): T1 extends FloatValue<any> ? Float : Int => {
   const outputType: Type = num instanceof FloatValue ? Float : Int;
@@ -112,7 +98,7 @@ export const negate = <T1 extends IntValue<any, any> | FloatValue<any>>(
  */
 
 export const equals = <T extends Value>(a: T, b: ValueOrInputType<T>): Boolean => {
-  const bParametrized = parameterize(b, AnyProperty);
+  const bParametrized = parameterize(b);
   return expression(Boolean)`${a} = ${bParametrized}`;
 };
 
@@ -121,7 +107,7 @@ export const equals_weak = (a: Value, b: Value): Boolean => {
 };
 
 export const notEquals = <T extends Value>(a: T, b: ValueOrInputType<T>): Boolean => {
-  const bParametrized = parameterize(b, AnyProperty);
+  const bParametrized = parameterize(b);
   return expression(Boolean)`${a} <> ${bParametrized}`;
 };
 
@@ -130,71 +116,69 @@ export const notEquals_weak = (a: Value, b: Value): Boolean => {
 };
 
 export const greaterThan = (
-  val: IntValue<any, any> | FloatValue<any>,
-  check: ValueOrInputType<IntValue<any, any> | FloatValue<any>>,
+  val: IntValue<any> | FloatValue<any>,
+  check: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const checkParametrized = parameterize(check, AnyProperty);
+  const checkParametrized = parameterize(check);
   return expression(Boolean)`(${val} > ${checkParametrized})`;
 };
 
 export const lessThan = (
-  val: IntValue<any, any> | FloatValue<any>,
-  check: ValueOrInputType<IntValue<any, any> | FloatValue<any>>,
+  val: IntValue<any> | FloatValue<any>,
+  check: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const checkParametrized = parameterize(check, AnyProperty);
+  const checkParametrized = parameterize(check);
   return expression(Boolean)`(${val} < ${checkParametrized})`;
 };
 
 export const greaterThanEq = (
-  val: IntValue<any, any> | FloatValue<any>,
-  check: ValueOrInputType<IntValue<any, any> | FloatValue<any>>,
+  val: IntValue<any> | FloatValue<any>,
+  check: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const checkParametrized = parameterize(check, AnyProperty);
+  const checkParametrized = parameterize(check);
   return expression(Boolean)`(${val} >= ${checkParametrized})`;
 };
 
 export const lessThanEq = (
-  val: IntValue<any, any> | FloatValue<any>,
-  check: ValueOrInputType<IntValue<any, any> | FloatValue<any>>,
+  val: IntValue<any> | FloatValue<any>,
+  check: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const checkParametrized = parameterize(check, AnyProperty);
+  const checkParametrized = parameterize(check);
   return expression(Boolean)`(${val} <= ${checkParametrized})`;
 };
 
 export const between = (
-  val: IntValue<any, any> | FloatValue<any>,
-  lower: ValueOrInputType<IntValue<any, any> | FloatValue<any>>,
-  upper: ValueOrInputType<IntValue<any, any> | FloatValue<any>>,
+  val: IntValue<any> | FloatValue<any>,
+  lower: ValueOrInputType<IntValue<any> | FloatValue<any>>,
+  upper: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const lowerParametrized = parameterize(lower, AnyProperty);
-  const upperParametrized = parameterize(upper, AnyProperty);
+  const lowerParametrized = parameterize(lower);
+  const upperParametrized = parameterize(upper);
   return expression(Boolean)`(${lowerParametrized} < ${val} < ${upperParametrized})`;
 };
 
 export const betweenEq = (
-  val: IntValue<any, any> | FloatValue<any>,
-  lower: ValueOrInputType<IntValue<any, any> | FloatValue<any>>,
-  upper: ValueOrInputType<IntValue<any, any> | FloatValue<any>>,
+  val: IntValue<any> | FloatValue<any>,
+  lower: ValueOrInputType<IntValue<any> | FloatValue<any>>,
+  upper: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const lowerParametrized = parameterize(lower, AnyProperty);
-  const upperParametrized = parameterize(upper, AnyProperty);
+  const lowerParametrized = parameterize(lower);
+  const upperParametrized = parameterize(upper);
   return expression(Boolean)`(${lowerParametrized} <= ${val} <= ${upperParametrized})`;
 };
 
 export const isNotNull = (val: Value): Boolean => expression(Boolean)`${val} IS NOT NULL`;
 export const isNull = (a: Value): Boolean => expression(Boolean)`${a} IS NULL`;
 
-export const hasLabel = (
-  node: NodeValue | NodeUnionValue | Optional<NodeValue | NodeUnionValue>,
-  label: string,
-): Boolean => expression(Boolean)`${node}:${label}`;
+export const hasLabel = (node: NodeValue | Optional<NodeValue>, label: string): Boolean =>
+  expression(Boolean)`${node}:${label}`;
 
 export const inList = <T extends Value>(
   value: ValueOrInputType<T | Optional<T>>,
   list: ValueOrInputType<List<T>>,
 ) => {
-  const valueExpr = parameterize(value, AnyProperty);
-  const listExpr = parameterize(list, AnyProperty);
+  const valueExpr = parameterize(value);
+  const listExpr = parameterize(list);
   return expression(Boolean)`${valueExpr} IN ${listExpr}`;
 };
 
@@ -308,12 +292,19 @@ export const string_betweenEq = (
   BOOLEAN OPERATORS
  */
 
-export const and = (a: BooleanValue<any>, b: BooleanValue<any>): Boolean =>
-  expression(Boolean)`(${a} AND ${b})`;
+export const and = (...values: BooleanValue<any>[]): Boolean => {
+  return expressionDynamic(Boolean, expr => {
+    if (values.length === 0) return [expr`true`];
+    return values.map((value, i) => (i === 0 ? expr`${value}` : expr` AND ${value}`));
+  });
+};
 
-export const or = (a: BooleanValue<any>, b: BooleanValue<any>): Boolean =>
-  expression(Boolean)`(${a} OR ${b})`;
-
+export const or = (...values: BooleanValue<any>[]): Boolean => {
+  return expressionDynamic(Boolean, expr => {
+    if (values.length === 0) return [expr`true`];
+    return values.map((value, i) => (i === 0 ? expr`${value}` : expr` OR ${value}`));
+  });
+};
 export const xor = (a: BooleanValue<any>, b: BooleanValue<any>): Boolean =>
   expression(Boolean)`(${a} XOR ${b})`;
 
@@ -330,51 +321,4 @@ export const concat = (
   const aParametrized = parameterize(a, String);
   const bParametrized = parameterize(b, String);
   return expression(String)`${aParametrized} + ${bParametrized}`;
-};
-
-/*
-  PROPERTY OPERATORS
- */
-
-/**
- *  Property access for a strongly typed node
- */
-export const prop = <T extends NodeLikeDefinition, K extends PropertyNames<T>>(
-  node: GraphNode<T>,
-  key: K,
-): GetProp<T, K> => {
-  const nodeDef = NodeValue.getDefinition(node);
-  if (typeof nodeDef === "string") throw new Error("can't call on prop() on untyped node");
-  const model = loadNodeLikeModel(nodeDef);
-
-  const propertyModel = model.properties[key];
-  if (propertyModel) {
-    return expression(propertyModel.type)`${node}.${propertyModel.name}` as GetProp<T, K>;
-  }
-  throw new Error(`no such property '${key}' on '${node.constructor.name}'`);
-};
-
-type PropertyNames<T extends NodeLikeDefinition> = {
-  [K in keyof T]: T[K] extends Property<any> ? (K extends string ? K : never) : never;
-}[keyof T];
-
-type GetProp<T extends NodeLikeDefinition, K extends PropertyNames<T>> = T[K] extends Property<
-  infer TProperty
->
-  ? TProperty["type"]
-  : never;
-
-/**
- *  Property access for an untyped node
- */
-export const anyProp = <TType extends AllowedPropertyValue = Optional<AnyProperty>>(
-  node:
-    | NodeValue
-    | NodeUnionValue
-    | RelationshipValue
-    | Optional<NodeValue | NodeUnionValue | RelationshipValue>,
-  name: string,
-  type?: TypeOf<TType>,
-): TType => {
-  return expression((type ?? Optional.of(AnyProperty)) as any)`${node}.${name}` as TType;
 };

@@ -1,32 +1,89 @@
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { Definition } from "./definition";
-import { Cardinality } from "@core";
+import {
+  AbstractNodeDefinitionClass,
+  NodeDefinitionClass,
+  NodeUnionDefinitionClass,
+  RelationDefinition,
+  RelationDeleteStrategy,
+  RelationDirection,
+  RelationshipDefinitionClass,
+  RelationTypeInfo,
+} from "@schema/definition";
+import { Deconstruct } from "@utils/deconstruct";
 
-export type RelationCardinality = "one" | "optional" | "many";
-export type RelationDirection = "->" | "<-";
-export type RelationDeleteStrategy = "disconnect" | "cascade" | "no-delete";
+export const relation_one = <
+  TRelationship extends RelationshipDefinitionClass,
+  TDirection extends RelationDirection,
+  TTo extends NodeDefinitionClass | AbstractNodeDefinitionClass | NodeUnionDefinitionClass,
+>(
+  relationship: TRelationship,
+  direction: TDirection,
+  to: TTo,
+  deletionStrategy: RelationDeleteStrategy = "disconnect",
+): RelationDefinition<{
+  relationship: Deconstruct<TRelationship>;
+  direction: TDirection;
+  to: Deconstruct<TTo>;
+  cardinality: "one";
+}> => {
+  return {
+    kind: "Relation",
+    __typeInfo: null as any,
+    relationship,
+    direction,
+    to,
+    deletionStrategy,
+    cardinality: "one",
+  } satisfies RelationDefinition<RelationTypeInfo>;
+};
 
-export interface RelationDefinition {
-  to: ConstructorOf<Definition<"node" | "node-interface" | "abstract-node" | "node-union">>;
-  cardinality: RelationCardinality;
-  direction: RelationDirection;
-  relationship: ConstructorOf<Definition<"relationship">>;
-  deletionStrategy: RelationDeleteStrategy;
-}
+export const relation_many = <
+  TRelationship extends RelationshipDefinitionClass,
+  TDirection extends RelationDirection,
+  TTo extends NodeDefinitionClass | AbstractNodeDefinitionClass | NodeUnionDefinitionClass,
+>(
+  relationship: TRelationship,
+  direction: TDirection,
+  to: TTo,
+  deletionStrategy: RelationDeleteStrategy = "disconnect",
+): RelationDefinition<{
+  relationship: Deconstruct<TRelationship>;
+  direction: TDirection;
+  to: Deconstruct<TTo>;
+  cardinality: "many";
+}> => {
+  return {
+    kind: "Relation",
+    __typeInfo: null as any,
+    relationship,
+    direction,
+    to,
+    deletionStrategy,
+    cardinality: "many",
+  } satisfies RelationDefinition<RelationTypeInfo>;
+};
 
-export interface RelationTypeInfo {
-  to: Definition<"node" | "node-interface" | "abstract-node" | "node-union">;
-  cardinality: RelationCardinality;
-  direction: RelationDirection;
-  relationship: Definition<"relationship">;
-}
-
-export class Relation<TypeInfo extends RelationTypeInfo> {
-  private declare type: TypeInfo;
-
-  constructor(private definition: RelationDefinition) {}
-
-  static getDefinition(relation: Relation<any>): RelationDefinition {
-    return relation.definition;
-  }
-}
+export const relation_optional = <
+  TRelationship extends RelationshipDefinitionClass,
+  TDirection extends RelationDirection,
+  TTo extends NodeDefinitionClass | AbstractNodeDefinitionClass | NodeUnionDefinitionClass,
+>(
+  relationship: TRelationship,
+  direction: TDirection,
+  to: TTo,
+  deletionStrategy: RelationDeleteStrategy = "disconnect",
+): RelationDefinition<{
+  relationship: Deconstruct<TRelationship>;
+  direction: TDirection;
+  to: Deconstruct<TTo>;
+  cardinality: "optional";
+}> => {
+  return {
+    kind: "Relation",
+    __typeInfo: null as any,
+    relationship,
+    direction,
+    to,
+    deletionStrategy,
+    cardinality: "optional",
+  } satisfies RelationDefinition<RelationTypeInfo>;
+};

@@ -1,21 +1,25 @@
-import { queryStage, QueryStage } from "@core";
-import { NodeUnionValue, NodeValue, Optional, RelationshipValue } from "@cypher/types";
+import { queryOperation, QueryOperation } from "@core/query-operation";
 import { deleteClause } from "@core/clause";
-import { resolveVariable$ } from "@core/resolve-utils";
+import { Optional } from "@cypher/types/optional";
+import { Node } from "@cypher/types/structural/node";
+import { Relationship } from "@cypher/types/structural/relationship";
 
 export const $delete = (
-  relationship:
-    | NodeValue
-    | NodeUnionValue
-    | RelationshipValue
-    | Optional<NodeValue | NodeUnionValue | RelationshipValue>,
-): QueryStage<void, "same", "merge"> => {
-  const valueData = resolveVariable$(relationship, "$deleteRelationship expects variable");
-
-  return queryStage({
-    clauses: [deleteClause(valueData)],
-    outputShape: undefined,
-    cardinalityBehaviour: "same",
-    dataBehaviour: "merge",
+  relationship: Node | Relationship | Optional<Node | Relationship>,
+): QueryOperation<void, "same", "merge"> => {
+  return queryOperation({
+    name: "$delete",
+    resolver: resolveInfo => {
+      const valueData = resolveInfo.resolveVariable(
+        relationship,
+        "$deleteRelationship expects variable",
+      );
+      return {
+        clauses: [deleteClause(valueData)],
+        outputShape: undefined,
+        cardinalityBehaviour: "same",
+        dataBehaviour: "merge",
+      };
+    },
   });
 };

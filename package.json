@@ -1,13 +1,24 @@
 {
-  "name": "@alexski-perry/neo4j-querier",
+  "name": "alexski-perry/apus",
   "version": "0.0.1",
   "private": false,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "module2": {
+      "import": "./dist/es/module2.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/module2.ts"
+    }
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexski-perry/neo4j-querier"
+    "url": "https://github.com/alexski-perry/apus"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/alexski-perry"
@@ -21,8 +32,9 @@
     "release": "pnpm run build && changeset publish"
   },
   "dependencies": {
-    "neo4j-driver": "^5.15.0",
-    "neo4j-driver-core": "^5.15.0",
+    "nanoid": "3",
+    "neo4j-driver": "^5.23.0",
+    "neo4j-driver-core": "^5.23.0",
     "ts-mixer": "^6.0.3",
     "ts-toolbelt": "^9.6.0"
   },
@@ -35,7 +47,7 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.0.1",
-    "typescript": "latest"
+    "typescript": "^5.5.4"
   },
   "prettier": {
     "printWidth": 95,

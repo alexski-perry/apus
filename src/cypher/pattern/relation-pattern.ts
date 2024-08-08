@@ -1,26 +1,31 @@
-import { getNodeType, GraphRelationship, NodeValue, MakeNodeValue } from "@cypher/types";
-import { getNodeLabels, getRelationshipName, RelationModel } from "@schema/models";
-import { declarePatternVariable, MatchPattern } from "@core";
-import { NodeLikeOrUnionDefinition, RelationshipDefinition } from "@schema/definition";
-import { RelationCardinality } from "@schema/relation";
-import { getRelationshipType } from "@cypher/types/utils";
-import { ConstructorOf } from "@utils/ConstructorOf";
+import { patternVariableDeclaration } from "@core/pattern/pattern-variable-declaration";
+import { Node, NodeValue } from "@cypher/types/structural/node";
+import { MatchPattern } from "@core/pattern/match-pattern";
+import { getDefinitionClass, RelationModel } from "@schema/model";
+import {
+  AbstractNodeDefinition,
+  NodeDefinition,
+  NodeUnionDefinition,
+  RelationCardinality,
+  RelationshipDefinition,
+} from "@schema/definition";
+import { Relationship, RelationshipValue } from "@cypher/types/structural/relationship";
+import { getNodeLabelsForMatching } from "@schema/utils";
 
 export class RelationPattern<
-  TNode extends NodeLikeOrUnionDefinition,
+  TNode extends NodeDefinition | AbstractNodeDefinition | NodeUnionDefinition,
   TRelationship extends RelationshipDefinition,
   TCardinality extends RelationCardinality,
-> extends MatchPattern<
-  MakeNodeValue<ConstructorOf<TNode>>,
-  ConvertRelationCardinality<TCardinality>
-> {
+> extends MatchPattern<Node<TNode>, ConvertRelationCardinality<TCardinality>> {
   public withRelationship: MatchPattern<
-    [MakeNodeValue<ConstructorOf<TNode>>, GraphRelationship<TRelationship>],
+    [Node<TNode>, Relationship<TRelationship>],
     ConvertRelationCardinality<TCardinality>
   >;
 
   constructor(from: NodeValue, model: RelationModel) {
-    const toNodeVariable = declarePatternVariable(getNodeType(model.to));
+    const toNodeVariable = patternVariableDeclaration(
+      NodeValue.makeType(getDefinitionClass(model.to)),
+    );
 
     const cardinality = {
       one: "one" as const,
@@ -40,19 +45,19 @@ export class RelationPattern<
           entityType: "relationship",
           direction: model.direction,
           value: null,
-          relationshipNames: [getRelationshipName(model.relationship)],
+          relationshipNames: [model.relationship.name],
         },
         {
           entityType: "node",
           value: toNodeVariable,
-          nodeLabels: getNodeLabels(model.to),
+          nodeLabels: getNodeLabelsForMatching(model.to),
         },
       ],
       cardinality,
     });
 
-    const relationshipVariable = declarePatternVariable(
-      getRelationshipType(model.relationship),
+    const relationshipVariable = patternVariableDeclaration(
+      RelationshipValue.makeType(getDefinitionClass(model.relationship)),
     );
 
     this.withRelationship = new MatchPattern({
@@ -67,12 +72,12 @@ export class RelationPattern<
           entityType: "relationship",
           direction: model.direction,
           value: relationshipVariable,
-          relationshipNames: [getRelationshipName(model.relationship)],
+          relationshipNames: [model.relationship.name],
         },
         {
           entityType: "node",
           value: toNodeVariable,
-          nodeLabels: getNodeLabels(model.to),
+          nodeLabels: getNodeLabelsForMatching(model.to),
         },
       ],
       cardinality,

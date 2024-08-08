@@ -1,39 +1,36 @@
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { Value } from "@core/value";
-import { QueryDataOutput, QueryDataInput } from "@core/utils/query-data";
+import { GetValueInputType, Value } from "@core/value";
 import { Neo4jValue } from "@core/neo4j-value";
-import { getDebugName, parseValue, serializeValue, setTypeInfo, Type } from "@core/type";
+import { parseValue, serializeValue, Type, TypeOf } from "@core/type/type";
 import { isPureObject } from "@utils/isPureObject";
 import { Id } from "@utils/Id";
 import { stringifyObject } from "@utils/stringifyObject";
+import { GetQueryDataOutputType } from "@core/query-data";
+import { getDebugName, setTypeInfo } from "@core/type/type-info";
 
-export class Map<T extends Record<string, Value>> extends Value<
-  MapInputType<T>,
-  MapOutputType<T>
-> {
-  private declare _typeInfo_list: T;
-
-  constructor(private _type: Record<string, ConstructorOf<Value>>) {
+export class Map<
+  TStructure extends Record<string, Value> = Record<string, Value>,
+> extends Value<["Map", TStructure], MapInputType<TStructure>, MapOutputType<TStructure>> {
+  constructor(private _structure: Record<string, Type>) {
     super();
   }
 
-  static of<T extends Record<string, Value>>(
-    ofType: Record<string, ConstructorOf<Value>>,
-  ): ConstructorOf<Map<T>> {
-    const mapClass = class extends Map<T> {
+  static makeType<T extends Record<string, Value>>(
+    structure: Record<string, Type>,
+  ): TypeOf<Map<T>> {
+    const type = class extends Map<T> {
       constructor() {
-        super(ofType);
+        super(structure);
       }
     };
 
-    setTypeInfo<MapInputType<T>, MapOutputType<T>>(mapClass, {
+    setTypeInfo<MapInputType<T>, MapOutputType<T>>(type, {
       parseValue: (val: Neo4jValue) => {
         if (!isPureObject(val)) return undefined;
         const valObject: Record<string, any> = val as any;
 
         const parsed: Record<string, any> = {};
 
-        Object.entries(ofType).forEach(([key, type]) => {
+        Object.entries(structure).forEach(([key, type]) => {
           const keyVal = valObject[key];
           const parsedItem = parseValue(keyVal, type);
           if (!parsedItem) return undefined;
@@ -48,7 +45,7 @@ export class Map<T extends Record<string, Value>> extends Value<
 
         const serialized: Record<string, any> = {};
 
-        Object.entries(ofType).forEach(([key, type]) => {
+        Object.entries(structure).forEach(([key, type]) => {
           const keyVal = valObject[key];
           const serializedItem = serializeValue(keyVal, type);
           if (!serializedItem) return undefined;
@@ -58,24 +55,26 @@ export class Map<T extends Record<string, Value>> extends Value<
         return serialized;
       },
       debugName: `Map<${stringifyObject(
-        ofType,
+        structure,
         val => typeof val === "function",
         (val: Type) => getDebugName(val),
       )}>`,
     });
 
-    return mapClass;
+    return type;
   }
 
-  static getType(map: Map<any>) {
-    return map._type;
+  static getStructure(map: Map<any>) {
+    return map._structure;
   }
 }
 
+// INTERNAL TYPES
+
 type MapInputType<T extends Record<string, Value>> = Id<{
-  [K in keyof T]: QueryDataInput<T[K]>;
+  [K in keyof T]: GetValueInputType<T[K]>;
 }>;
 
 type MapOutputType<T extends Record<string, Value>> = Id<{
-  [K in keyof T]: QueryDataOutput<T[K]>;
+  [K in keyof T]: GetQueryDataOutputType<T[K]>;
 }>;

@@ -1,45 +1,56 @@
-import { ConstructorOf } from "@utils/ConstructorOf";
-import { NodeLikeOrUnionDefinition } from "@schema/definition";
-import { anyProp, castNonNull, equals } from "cypher/expression";
+import { Query, query_untyped } from "@core/query";
+import { Optional } from "@cypher/types/optional";
+import { $optionalMatchNode } from "@cypher/stages/$matchNode";
+import { $where } from "@cypher/stages/$where";
+import { equals, isNull } from "@cypher/expression/operators";
+import { propUnsafe } from "@cypher/expression/prop";
+import { $throwIf } from "@cypher/stages/procedures/$throwIf";
+import { forceType } from "@cypher/expression/casting";
 import {
-  $forceCardinality,
-  $matchNode,
-  $optionalMatchNode,
-  $throwIfNull,
-  $where,
-} from "@cypher/stages";
-import { Query } from "@core";
-import { ID, MakeNodeValue, Optional } from "@cypher/types";
-import { query } from "@cypher/query";
-import { getNodeLabels } from "@schema/models";
-import { recastValue } from "@core/utils";
+  AbstractNodeDefinitionClass,
+  NodeDefinitionClass,
+  NodeUnionDefinitionClass,
+} from "@schema/definition";
+import { Node } from "@cypher/types/structural/node";
+import { DefinitionFromClass, getNodeLabelsForMatching } from "@schema/utils";
 
 export const findByID = <
-  TNode extends string | ConstructorOf<NodeLikeOrUnionDefinition>,
+  TDef extends
+    | string
+    | NodeDefinitionClass
+    | AbstractNodeDefinitionClass
+    | NodeUnionDefinitionClass,
   TOptions extends FindByIdOptions = {},
 >(
-  nodeDefinition: TNode,
+  nodeDefinition: TDef,
   id: string | undefined,
   config?: TOptions,
 ): Query<
-  TOptions["optional"] extends true ? Optional<MakeNodeValue<TNode>> : MakeNodeValue<TNode>,
+  TOptions["optional"] extends true
+    ? Optional<Node<DefinitionFromClass<TDef>>>
+    : Node<DefinitionFromClass<TDef>>,
   "one"
 > => {
-  const queryStart = query()
-    .pipe(() => $optionalMatchNode("@", nodeDefinition))
-    .pipe(node => $where(equals(anyProp(node, config?.propertyName ?? "id", ID), id ?? null)));
+  const baseQuery = query_untyped(
+    () => $optionalMatchNode(nodeDefinition),
+    node => $where(equals(propUnsafe(node, config?.propertyName ?? "id"), id ?? null)),
+  );
 
   if (config && "optional" in config && config["optional"] == true) {
-    return queryStart as Query<any, any>;
+    return baseQuery;
   } else {
     const errorMessage =
       config && "errorMessage" in config
         ? config.errorMessage
-        : `Couldn't find node '${getNodeLabels(nodeDefinition).join("|")}' with ID '${id}'`;
+        : `Couldn't find node '${getNodeLabelsForMatching(nodeDefinition).join(
+            "|",
+          )}' with ID '${id}'`;
 
-    return queryStart
-      .pipe(node => $throwIfNull(node, errorMessage))
-      .pipe(node => recastValue(node, Optional.getInnerType(node))) as Query<any, any>;
+    return query_untyped(
+      baseQuery,
+      node => $throwIf(isNull(node), errorMessage),
+      node => forceType(node, Optional.getInnerType(node)),
+    );
   }
 };
 

@@ -1,6 +1,6 @@
 export { collect } from "@cypher/queries/collect";
 export { createNode } from "@cypher/queries/createNode";
-export { deleteNode } from "@cypher/queries/deleteNode";
+export { $deleteNode } from "@cypher/stages/$deleteNode";
 export { filter } from "@cypher/queries/filter";
 export { findAll } from "@cypher/queries/findAll";
 export { findAllByIDs } from "@cypher/queries/findAllByIDs";
@@ -15,4 +15,4 @@ export { match, optionalMatch, optionalMatchNode, matchNode } from "@cypher/quer
 export { paginate } from "@cypher/queries/paginate";
 export { project } from "@cypher/queries/project";
 export { sort } from "@cypher/queries/sort";
-export { throwIfNull } from "@cypher/queries/throwIfNull";
+export { union } from "@cypher/queries/union";

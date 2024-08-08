@@ -1,13 +1,18 @@
-import { Int } from "../types";
-import { queryStage, QueryStage } from "@core/query-stage";
-import { parameterize } from "@cypher/expression/param";
-import { resolveValue$ } from "@core/resolve-utils";
+import { queryOperation, QueryOperation } from "@core/query-operation";
 import { limitClause } from "@core/clause";
+import { Int } from "@cypher/types/scalar/int";
+import { parameterize } from "@core/parameterize";
 
-export const $limit = (val: Int | number): QueryStage<void, "same", "merge"> =>
-  queryStage({
-    clauses: [limitClause(resolveValue$(parameterize(val, Int)))],
-    outputShape: undefined,
-    cardinalityBehaviour: "same",
-    dataBehaviour: "merge",
+export const $limit = (val: Int | number): QueryOperation<void, "same", "merge"> => {
+  return queryOperation({
+    name: "$limit",
+    resolver: resolveInfo => {
+      return {
+        clauses: [limitClause(resolveInfo.resolveValue(parameterize(val, Int)))],
+        outputShape: undefined,
+        cardinalityBehaviour: "same",
+        dataBehaviour: "merge",
+      };
+    },
   });
+};

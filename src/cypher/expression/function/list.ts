@@ -1,7 +1,7 @@
-import { List } from "@cypher/types";
-import { Int, StringValue } from "@cypher/types";
-import { expression } from "@cypher/expression/core";
+import { expression } from "@core/expression";
+import { List } from "@cypher/types/list";
+import { StringValue } from "@cypher/types/scalar/string";
+import { Int } from "@cypher/types/scalar/int";
 
-export const length = (value: List<any> | StringValue<any>) => {
-  return expression(Int)`length(${value})`;
-};
+export const length = (value: List<any> | StringValue<any>) =>
+  expression(Int)`length(${value})`;

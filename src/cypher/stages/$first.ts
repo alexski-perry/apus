@@ -1,13 +1,18 @@
-import { queryStage, QueryStage } from "@core";
-import { Int } from "@cypher/types";
+import { queryOperation, QueryOperation } from "@core/query-operation";
 import { limitClause } from "@core/clause";
-import { resolveValue$ } from "@core/resolve-utils";
-import { expression } from "@cypher/expression/core";
+import { expression } from "@core/expression";
+import { Int } from "@cypher/types/scalar/int";
 
-export const $first = (): QueryStage<void, "force-none-or-one", "merge"> =>
-  queryStage({
-    clauses: [limitClause(resolveValue$(expression(Int)`1`))],
-    outputShape: undefined,
-    cardinalityBehaviour: "force-one",
-    dataBehaviour: "merge",
+export const $first = (): QueryOperation<void, "force-none-or-one", "merge"> => {
+  return queryOperation({
+    name: "$first",
+    resolver: resolveInfo => {
+      return {
+        clauses: [limitClause(resolveInfo.resolveValue(expression(Int)`1`))],
+        outputShape: undefined,
+        cardinalityBehaviour: "force-one",
+        dataBehaviour: "merge",
+      };
+    },
   });
+};

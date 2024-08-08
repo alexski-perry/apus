@@ -1,5 +1,5 @@
-import { Parameter } from "@core/value-data";
-import { serializeValue } from "@core/type";
+import { Parameter } from "@core/value-info";
+import { serializeValue } from "@core/type/type";
 
 export class ParamRegistry {
   private paramCount: number = 1;

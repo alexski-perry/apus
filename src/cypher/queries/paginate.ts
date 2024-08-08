@@ -1,8 +1,9 @@
-import { Query, Cardinality, QueryData } from "@core";
-import { $paginate } from "@cypher/stages";
-import { PaginateData } from "@cypher/stages/$paginate";
+import { $paginate, PaginateData } from "@cypher/stages/$paginate";
+import { QueryData } from "@core/query-data";
+import { QueryCardinality } from "@core/query-cardinality";
+import { Query, query_untyped } from "@core/query";
 
-export const paginate = <TData extends QueryData, TCard extends Cardinality>(
-  query: Query<TData, TCard>,
+export const paginate = <TData extends QueryData, TCard extends QueryCardinality>(
+  inputQuery: Query<TData, TCard>,
   paginateF: (data: TData) => PaginateData,
-): Query<TData, TCard> => query.pipe(out => $paginate(paginateF(out))) as Query<any, any>;
+): Query<TData, TCard> => query_untyped(inputQuery, data => $paginate(paginateF(data)));

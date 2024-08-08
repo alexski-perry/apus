@@ -1,122 +1,144 @@
-import { Definition, RelationshipDefinition } from "@schema/definition";
-import { RelationCardinality } from "@schema/relation";
-import { GraphNode, NodeValue, Optional } from "@cypher/types";
-import { Query } from "@core";
-import { CreatedRelationship } from "@cypher/mutation";
-import { constructorOf } from "@utils/ConstructorOf";
-import { isNotNull } from "@cypher/expression";
-import { RelationOperation } from "@cypher/mutation/core/RelationOperation";
-import { subquery } from "@cypher/query";
-import { $effect, $subquery, $where } from "@cypher/stages";
-import { $create } from "@cypher/stages/unsafe/$create";
-import { creationPattern } from "@cypher/pattern/creation-pattern-builder";
-import { $handleMutation } from "@cypher/mutation/utils/$handleMutation";
+import { Query } from "@core/query";
+import { RelationOperation } from "@cypher/mutation/operations/RelationOperation";
+import { handleMutation } from "@cypher/mutation/utils/handleMutation";
+import { NodeValue } from "@cypher/types/structural/node";
+import { Optional } from "@cypher/types/optional";
+import { isNotNull } from "@cypher/expression/operators";
+import {
+  CreatedRelationship,
+  GetCreatedRelationshipDefinition,
+} from "@cypher/mutation/createRelationship";
+import {
+  GetNodeDefinitionFromRelationInput,
+  RelationInput,
+} from "@cypher/mutation/utils/RelationInput";
+import {
+  AbstractNodeDefinition,
+  NodeDefinition,
+  NodeUnionDefinition,
+  RelationCardinality,
+  RelationshipDefinition,
+} from "@schema/definition";
+import { getDefinitionClass } from "@schema/model";
+import { Value } from "@core/value";
+import {
+  callSubqueryClause,
+  Clause,
+  createClause,
+  importWithClause,
+  resetCardinalityReturnClause,
+  whereClause,
+} from "@core/clause";
+import { Any } from "@cypher/types/any";
+import { isVariable, Variable } from "@core/value-info";
+import { getRelationshipName } from "@schema/utils";
+import { RelationshipValue } from "@cypher/types/structural/relationship";
+
+export function relateTo<
+  TRelateTo extends RelationInput,
+  TRelationship extends CreatedRelationship<any> | null = null,
+>(
+  node: TRelateTo,
+  relationship: TRelationship | null = null,
+): RelateToOperation<
+  GetNodeDefinitionFromRelationInput<TRelateTo>,
+  GetCreatedRelationshipDefinition<TRelationship>,
+  RelateToCardinality<TRelateTo>
+> {
+  return new RelateToOperation(node, relationship);
+}
 
 export class RelateToOperation<
-  TNode extends Definition<"node" | "abstract-node" | "node-interface" | "node-union">,
+  TNode extends NodeDefinition | AbstractNodeDefinition | NodeUnionDefinition,
   TRelationship extends RelationshipDefinition | null,
   TCard extends RelationCardinality,
 > extends RelationOperation {
   private declare _typeInfo: [TNode, TRelationship, TCard];
 
-  constructor(
-    relateTo: NodeValue | Optional<NodeValue> | Query<NodeValue | Optional<NodeValue>, any>,
-    relationshipDataResolver: ((node: NodeValue) => CreatedRelationship<any>) | null,
-  ) {
-    super(({ entityValue, relationModel }) => {
-      if (!(entityValue instanceof NodeValue))
-        throw new Error("relateTo can only be applied to a node");
+  constructor(relateTo: RelationInput, relationship: CreatedRelationship<any> | null) {
+    super(({ relationModel, targetVariable, resolveInfo }) => {
+      const mutationClauses: Clause[] = [];
+      let relateToVariable: Variable;
 
-      const subqueryStart =
-        relateTo instanceof Query
-          ? subquery({
-              currentNode: entityValue,
-            }).pipe(() => $subquery(":relateTo", relateTo))
-          : subquery({
-              currentNode: entityValue,
-              relateTo,
-            });
-
-      let subqueryComplete = subqueryStart
-        .pipe(row => $where(isNotNull(row.relateTo)))
-        .pipe(row =>
-          $create(
-            creationPattern()
-              .node(row.currentNode)
-              .newRelationship(
-                constructorOf(relationModel.relationship.definition), // todo make helper function for this
-                relationModel.direction,
-                ":rel",
-              )
-              .newNode(
-                constructorOf(relationModel.to.definition) as unknown as string, // todo maybe should cast to string to trick type system into making UntypedNode
-                ":newNode",
-              ),
-          ),
+      if (relateTo instanceof Query) {
+        const { clauses, outputShape } = resolveInfo.resolveSubquery(relateTo);
+        if (!isVariable(outputShape)) {
+          throw new Error("relateTo: provided query had unexpected type");
+        }
+        relateToVariable = outputShape;
+        mutationClauses.push(
+          importWithClause([targetVariable]),
+          callSubqueryClause([importWithClause([targetVariable]), ...clauses]),
         );
-
-      if (relationshipDataResolver !== null) {
-        const { data: relationshipData, relationshipModel } = CreatedRelationship.getData(
-          relationshipDataResolver(entityValue),
-        );
-
-        subqueryComplete = subqueryComplete.pipe(row =>
-          $handleMutation({
-            entityValue: row.rel,
-            data: relationshipData,
-            entityModel: relationshipModel,
-            mutationType: "create",
-          }),
-        );
+      } else {
+        relateToVariable = resolveInfo.resolveVariable(relateTo);
+        mutationClauses.push(importWithClause([targetVariable, relateToVariable]));
       }
 
-      return [$effect(subqueryComplete)];
+      const relationshipVariable = resolveInfo.defineVariable(
+        RelationshipValue.makeType(getDefinitionClass(relationModel.relationship)),
+      );
+
+
+
+      mutationClauses.push(
+        whereClause([
+          Value.getValueInfo(isNotNull(Value.create(relateToVariable.type, relateToVariable))),
+        ]),
+        createClause([
+          [
+            {
+              entityType: "node",
+              variable: targetVariable,
+              nodeLabels: [],
+            },
+            {
+              entityType: "relationship",
+              direction: relationModel.direction,
+              variable: relationshipVariable,
+              relationshipNames: getRelationshipName(relationModel.relationship),
+            },
+            {
+              entityType: "node",
+              variable: relateToVariable,
+              nodeLabels: [],
+            },
+          ],
+        ]),
+      );
+
+      mutationClauses.push(
+        ...handleMutation({
+          targetVariable: relationshipVariable,
+          data: relationship ? CreatedRelationship.getData(relationship) : {},
+          entityModel: relationModel.relationship,
+          mutationType: "create",
+          resolveInfo,
+        }),
+      );
+
+      return [
+        callSubqueryClause([
+          ...mutationClauses,
+          resetCardinalityReturnClause(resolveInfo.defineVariable(Any)),
+        ]),
+      ];
     });
   }
 }
-
-export const relateTo = <
-  TNodeInput extends NodeInput,
-  TRelationshipInput extends CreatedRelationship<any> | null = null,
->(
-  node: TNodeInput,
-  relationship?: TRelationshipInput,
-): RelateToOperation<
-  GetNodeDef<TNodeInput>,
-  TRelationshipInput extends CreatedRelationship<infer TRelDef> ? TRelDef : null,
-  GetCardinality<TNodeInput>
-> => new RelateToOperation(node, (relationship as any) ?? null);
 
 /*
   INTERNAL TYPES
  */
 
-type NodeInput = NodeValue | Optional<NodeValue> | Query<NodeValue | Optional<NodeValue>, any>;
-
-type GetNodeDef<T extends NodeInput> = T extends Optional<GraphNode<infer TNode>>
-  ? TNode
-  : T extends GraphNode<infer TNode>
-  ? TNode
-  : T extends Array<GraphNode<infer TNode>>
-  ? TNode
-  : T extends Query<infer TData, any>
-  ? TData extends GraphNode<infer TNode>
-    ? TNode
-    : TData extends Optional<GraphNode<infer TNode>>
-    ? TNode
-    : never
-  : never;
-
-type GetCardinality<T extends NodeInput> = T extends NodeValue
+type RelateToCardinality<T extends RelationInput> = T extends NodeValue
   ? "one"
   : T extends Optional<NodeValue>
-  ? "optional"
-  : T extends Array<NodeValue>
-  ? "many"
-  : T extends Query<infer TData, infer TCardinality>
-  ? TCardinality extends "many"
-    ? "many"
-    : TData extends Optional<NodeValue>
     ? "optional"
-    : "one"
-  : never;
+    : T extends Query<infer TData, infer TCardinality>
+      ? TCardinality extends "many"
+        ? "many"
+        : TData extends Optional<NodeValue>
+          ? "optional"
+          : "one"
+      : never;

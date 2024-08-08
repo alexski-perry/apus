@@ -1,6 +1,7 @@
-import { Query, QueryData } from "@core";
-import { $first } from "@cypher/stages";
+import { QueryData } from "@core/query-data";
+import { Query, query_untyped } from "@core/query";
+import { $first } from "@cypher/stages/$first";
 
 export const first = <TData extends QueryData>(
-  query: Query<TData, any>,
-): Query<TData, "one"> => query.pipe(() => $first()) as Query<any, any>;
+  inputQuery: Query<TData, any>,
+): Query<TData, "one"> => query_untyped(inputQuery, () => $first());

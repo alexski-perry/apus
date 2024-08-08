@@ -1,4 +1,4 @@
-import { isValueData, Parameter, Variable } from "@core/value-data";
+import { isValueInfo, Parameter, Variable } from "@core/value-info";
 import { deepMap } from "@utils/deepMap";
 
 type VarOrParam = Variable | Parameter;
@@ -12,10 +12,10 @@ export type DataShape =
   | Array<VarOrParam>;
 
 const isObjectDataShape = (shape: DataShape): shape is Record<string, DataShape> =>
-  !!shape && !isValueData(shape) && !Array.isArray(shape);
+  !!shape && !isValueInfo(shape) && !Array.isArray(shape);
 
 export const mapDataShape = (dataShape: DataShape, mapF: (data: VarOrParam) => any): any =>
-  deepMap(dataShape, isValueData, mapF);
+  deepMap(dataShape, isValueInfo, mapF);
 
 export const allVariablesFromDataShape = (dataShape: DataShape): Array<Variable> => {
   const variables: Array<Variable> = [];
@@ -31,5 +31,5 @@ export const mergeDataShape = (input: DataShape, output: DataShape): DataShape =
   isObjectDataShape(input) && isObjectDataShape(output)
     ? { ...input, ...output }
     : output === undefined
-    ? input
-    : output;
+      ? input
+      : output;
