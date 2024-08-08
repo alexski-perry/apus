@@ -24,7 +24,7 @@
     "run": "ts-node -r tsconfig-paths/register example/example.ts",
     "test": "vitest run",
     "build": "tsup",
-    "lint": "tsc",
+    "lint": "tsc --p ./tsconfig.json",
     "ci": "pnpm run lint && pnpm run test && pnpm run build",
     "release": "pnpm run build && changeset publish"
   },
