@@ -1,6 +1,6 @@
 import { Query, query_untyped } from "@core/query";
 import { NodeCreateData } from "@cypher/mutation/utils/NodeCreateData";
-import { $createNode } from "neo4j-querier/Stages";
+import { $createNode } from "neo4j-querier/stages";
 import { NodeDefinitionClass } from "@schema/definition";
 import { DefinitionFromClass } from "@schema/utils";
 import { Node } from "@cypher/types/structural/node";

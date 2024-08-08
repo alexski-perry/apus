@@ -4,7 +4,7 @@ import {
   MatchPattern,
 } from "@core/pattern/match-pattern";
 import { Query, query_untyped } from "@core/query";
-import { $match, $matchNode, $optionalMatch, $optionalMatchNode } from "neo4j-querier/Stages";
+import { $match, $matchNode, $optionalMatch, $optionalMatchNode } from "neo4j-querier/stages";
 import {
   AbstractNodeDefinitionClass,
   NodeDefinitionClass,
