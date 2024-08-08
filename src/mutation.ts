@@ -1,0 +1,7 @@
+export {createRelationship} from "@cypher/mutation/createRelationship"
+export {replace} from "@cypher/mutation/operations/replace"
+export {disconnect} from "@cypher/mutation/operations/disconnect"
+export {disconnectAll} from "@cypher/mutation/operations/disconnect-all"
+export {remove} from "@cypher/mutation/operations/remove"
+export {replaceOrRemove} from "@cypher/mutation/operations/replace-or-remove"
+export {relateTo} from "@cypher/mutation/operations/relate-to"
