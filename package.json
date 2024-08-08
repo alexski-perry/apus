@@ -4,7 +4,9 @@
   "private": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -37,6 +39,7 @@
     "ts-toolbelt": "^9.6.0"
   },
   "devDependencies": {
+    "@changesets/changelog-git": "^0.2.0",
     "@changesets/cli": "^2.27.7",
     "prettier": "^3.0.3",
     "ts-jest": "^29.1.1",
