@@ -23,7 +23,7 @@ export class ReplaceOrRemoveOperation<
   TNode extends NodeDefinition | AbstractNodeDefinition | NodeUnionDefinition,
   TRelationship extends RelationshipDefinition | null,
 > extends RelationOperation {
-  private declare _typeInfo: [TNode, TRelationship];
+  protected _typeInfo: [TNode, TRelationship] = null as any;
 
   constructor(replaceWith: RelationInput, relationship: CreatedRelationship<any> | null) {
     super(() => []);

@@ -7,7 +7,7 @@ import { Optional } from "@cypher/types/optional";
 import { Relationship } from "@cypher/types/structural/relationship";
 
 export class MatchPattern<TData extends QueryData, TCardinality extends QueryCardinality> {
-  private declare _type: [TData, TCardinality];
+  protected _typeInfo: [TData, TCardinality] = null as any;
 
   constructor(private _data: MatchPatternData) {}
 

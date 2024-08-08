@@ -26,6 +26,7 @@ import { getRelationshipName } from "@schema/utils";
 import { Value } from "@core/value";
 import { RelationshipValue } from "@cypher/types/structural/relationship";
 import { parameterize } from "@core/parameterize";
+import {an} from "vitest/dist/chunks/reporters.C_zwCd4j";
 
 export const disconnect = <TReplaceWith extends RelationInput>(
   node: TReplaceWith,
@@ -40,7 +41,7 @@ export const disconnectStrict = <TReplaceWith extends RelationInput>(
 export class DisconnectOperation<
   TNode extends NodeDefinition | AbstractNodeDefinition | NodeUnionDefinition,
 > extends RelationOperation {
-  private declare _typeInfo: [TNode];
+  protected _typeInfo: [TNode] = null as any;
 
   constructor(disconnect: RelationInput, isStrict: boolean) {
     super(({ relationModel, targetVariable, targetModel, resolveInfo }) => {

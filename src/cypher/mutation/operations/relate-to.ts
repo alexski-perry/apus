@@ -53,7 +53,7 @@ export class RelateToOperation<
   TRelationship extends RelationshipDefinition | null,
   TCard extends RelationCardinality,
 > extends RelationOperation {
-  private declare _typeInfo: [TNode, TRelationship, TCard];
+  protected _typeInfo: [TNode, TRelationship, TCard] = null as any;
 
   constructor(relateTo: RelationInput, relationship: CreatedRelationship<any> | null) {
     super(({ relationModel, targetVariable, resolveInfo }) => {

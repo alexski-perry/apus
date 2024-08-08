@@ -2,10 +2,10 @@ import { ConstructorOf } from "@utils/ConstructorOf";
 import { ValueInfo } from "@core/value-info";
 
 export abstract class Value<TTag = any, TInputType = any, TOutputType = any> {
-  private declare _typeMeta: [TTag, TInputType, TOutputType];
+  protected _typeMeta: [TTag, TInputType, TOutputType] = null as any;
 
-  private _info: ValueInfo | null = null;
-  private _dependencies: Set<Value> = new Set<Value>();
+  protected _info: ValueInfo | null = null;
+  protected _dependencies: Set<Value> = new Set<Value>();
 
   protected _wrap(): Value {
     return this;

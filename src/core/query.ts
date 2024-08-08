@@ -6,6 +6,7 @@ import {
   StageCardinalityBehaviour,
   StageDataBehaviour,
 } from "@core/query-operation";
+import {an} from "vitest/dist/chunks/reporters.C_zwCd4j";
 
 export function query<
   T1 extends QueryInput,
@@ -193,7 +194,7 @@ type CalculateStageCardinalityHelper<
       : never;
 
 export class Query<TData extends QueryData, TCardinality extends QueryCardinality> {
-  private declare _type: [TData, TCardinality];
+  protected _typeInfo: [TData, TCardinality] = null as any;
 
   constructor(private _stages: Array<QueryStageOrInput>) {}
 

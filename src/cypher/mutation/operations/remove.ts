@@ -2,7 +2,7 @@ import { RelationOperation } from "@cypher/mutation/operations/RelationOperation
 import { disconnectAll } from "@cypher/mutation/operations/disconnect-all";
 
 export class RemoveOperation extends RelationOperation {
-  private declare _typeInfo: "RemoveOperation";
+  protected _typeInfo: "RemoveOperation" = null as any;
 
   constructor() {
     super(data => {

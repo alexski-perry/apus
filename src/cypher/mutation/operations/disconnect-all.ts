@@ -12,7 +12,7 @@ import { RelationshipValue } from "@cypher/types/structural/relationship";
 import { getNodeLabelsForMatching, getRelationshipName } from "@schema/utils";
 
 export class DisconnectAllOperation extends RelationOperation {
-  private declare _typeInfo: ["DisconnectAllOperation"];
+  protected _typeInfo: ["DisconnectAllOperation"] = null as any;
 
   constructor() {
     super(({ relationModel, targetVariable, resolveInfo }) => {

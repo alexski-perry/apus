@@ -9,7 +9,7 @@ export class QueryOperation<
   TCardinalityEffect extends StageCardinalityBehaviour = StageCardinalityBehaviour,
   TDataEffect extends StageDataBehaviour = StageDataBehaviour,
 > {
-  private declare _typeInfo: [TData, TCardinalityEffect, TDataEffect];
+  protected _typeInfo: [TData, TCardinalityEffect, TDataEffect] = null as any;
 
   constructor(private _data: QueryOperationData) {}
 

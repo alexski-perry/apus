@@ -9,7 +9,7 @@ export interface CreationPatternData {
 }
 
 export class CreationPattern<TData extends QueryData> {
-  private declare _type: [TData];
+  protected _typeInfo: [TData] = null as any;
 
   constructor(private _data: CreationPatternData) {}
 

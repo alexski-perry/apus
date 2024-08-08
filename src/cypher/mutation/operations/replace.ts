@@ -37,7 +37,7 @@ export class ReplaceOperation<
   TRelationship extends RelationshipDefinition | null,
   TCardinality extends Exclude<RelationCardinality, "optional">,
 > extends RelationOperation {
-  private declare _typeInfo: [TNode, TRelationship, TCardinality];
+  protected _typeInfo: [TNode, TRelationship, TCardinality] = null as any;
 
   constructor(replaceWith: RelationInput, relationship: CreatedRelationship<any> | null) {
     super(({ relationModel, targetVariable, targetModel, resolveInfo }) => {
