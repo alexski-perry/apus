@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.0.3
+
+### Patch Changes
+
+- 3929aff: minor
+
 ## 0.0.2
 
 ### Patch Changes
