@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.0.6
+
+### Patch Changes
+
+- 03aad14: Refactor dummy fields to be protected so declaration files emitted with required annotations
+
 ## 0.0.5
 
 ### Patch Changes
