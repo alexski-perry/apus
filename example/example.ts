@@ -1,6 +1,15 @@
-import { $throwIf, $optionalMatchNode, $updateNode, $where } from "neo4j-querier/stages";
+import {
+  $throwIf,
+  $optionalMatchNode,
+  $updateNode,
+  $where,
+  $matchNode,
+  $mapMany,
+  $match,
+  $collect
+} from "neo4j-querier/stages";
 import { BlogPost, Image, PublishedBlogPost } from "./schemas/blog";
-import { createNode, findAll, findAllByIDs, findByID, project } from "neo4j-querier/queries";
+import {createNode, findAll, findAllByIDs, findByID, match, project} from "neo4j-querier/queries";
 import { equals, isNotNull, isNull } from "@cypher/expression/operators";
 import { query } from "@core/query";
 import { runQuery } from "./runQuery";
@@ -8,7 +17,8 @@ import { relateTo } from "@cypher/mutation/operations/relate-to";
 import { nanoid } from "nanoid";
 import { forceType } from "@cypher/expression/casting";
 import { Optional } from "@cypher/types/optional";
-import { propUnsafe } from "@cypher/expression/prop";
+import {pick, propUnsafe} from "@cypher/expression/prop";
+import {Node} from "neo4j-querier";
 
 // const getPostByShortID = (shortId: string) =>
 //   query(
@@ -93,17 +103,21 @@ const publishBlogPost = (
 // DUMMY IMAGE: 1066ad46-2c70-4985-9413-24e960ce5f43
 // DUMMY BLOG POST: fc9cb011-5505-45bd-ade2-9e7f5cb26899
 
-runQuery(
-  publishBlogPost("fc9cb011-5505-45bd-ade2-9e7f5cb26899", {
-    title: "ANOTHER NEW POST TITLE",
-    content: [],
-    contentImageIDs: [],
-    date: new Date(),
-    previewContent: [],
-    slug: "some-slug",
-    previewImageID: "1066ad46-2c70-4985-9413-24e960ce5f43",
+const matchingBlogPosts = runQuery(
+  () => $matchNode(PublishedBlogPost),
+  (published) => ({ published, main: match(published.parent) }),
+  ({ main }) => $where(equals(main.shortId, "OX-vp")),
+  ({ published, main }) => ({
+    ...pick(published, "title", "slug"),
+    ...pick(main, "shortId"),
+    contentImages: query(
+      match(published.contentImages),
+      (img) => pick(img, "id", "publicId", "altText"),
+      (img) => $collect(img)
+    ),
   }),
-).then(console.log);
+).then(res => console.log(""));
+
 
 /*
 export declare const mapBySubtype: <

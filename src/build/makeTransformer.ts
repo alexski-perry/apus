@@ -9,9 +9,7 @@ export const makeTransformer =
   (args: { outputShape: DataShape; cardinality: QueryCardinality }) =>
   (data: QueryResult): any => {
     const { outputShape, cardinality } = args;
-    let outputAsArray: any[] = [];
-
-    outputAsArray = data.records.map(record => {
+    let outputAsArray = data.records.map(record => {
       return mapDataShape(outputShape, val => {
         if (isParameter(val)) throw new Error("Unexpected parameter in output shape");
         const varName = printVariable(val);
