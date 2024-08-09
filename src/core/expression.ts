@@ -3,9 +3,9 @@ import { Map } from "@cypher/types/map";
 import { Pair } from "@cypher/types/pair";
 import { Triple } from "@cypher/types/triple";
 import { ExpressionPrintFn } from "@core/value-info";
-import { typeOf } from "@core/type/type";
+import {Type, typeOf} from "@core/type/type";
 import { Value } from "@core/value";
-import { isQueryDataMap, isTupleQueryData, QueryData } from "@core/query-data";
+import {isQueryDataMap, isTupleQueryData, mapQueryData, QueryData} from "@core/query-data";
 import { Any } from "@cypher/types/any";
 
 export const expression = <T extends Value>(type: ConstructorOf<T>) => {
@@ -132,7 +132,9 @@ export const expressionFromQueryData = (queryData: QueryData, additionalLevel = 
   } else if (queryData instanceof Value) {
     return queryData;
   } else if (isQueryDataMap(queryData)) {
-    return expressionMultiline(Map.makeType({}), line => {
+    const type: Record<string, Type> = mapQueryData(queryData, val => typeOf(val));
+
+    return expressionMultiline(Map.makeType(type), line => {
       const lines: Array<DynamicExpressionLine> = [];
       lines.push(line(additionalLevel)`{`);
       const entries = Object.entries(queryData);
