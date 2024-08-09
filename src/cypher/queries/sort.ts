@@ -1,4 +1,4 @@
-import { $orderBy, Orderings } from "@cypher/stages/$orderBy";
+import { $orderBy, Orderings } from "@cypher/operations/$orderBy";
 import { QueryData } from "@core/query-data";
 import { QueryCardinality } from "@core/query-cardinality";
 import { Query, query_untyped } from "@core/query";

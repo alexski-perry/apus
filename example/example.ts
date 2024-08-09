@@ -116,6 +116,9 @@ const matchingBlogPosts = runQuery(
       (img) => $collect(img)
     ),
   }),
+  yeet => ({
+
+  })
 ).then(res => console.log(""));
 
 

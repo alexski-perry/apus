@@ -2,4 +2,4 @@
 "@alexski-perry/apus": minor
 ---
 
-add pick utility
+Add pick utility

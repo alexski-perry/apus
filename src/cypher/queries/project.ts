@@ -1,4 +1,4 @@
-import { Mapping, ParseMapping } from "@cypher/stages/$map";
+import { Mapping, ParseMapping } from "@cypher/operations/$map";
 import {
   GetMatchPatternCardinality,
   GetMatchPatternData,

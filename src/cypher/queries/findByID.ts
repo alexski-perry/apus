@@ -1,10 +1,10 @@
 import { Query, query_untyped } from "@core/query";
 import { Optional } from "@cypher/types/optional";
-import { $optionalMatchNode } from "@cypher/stages/$matchNode";
-import { $where } from "@cypher/stages/$where";
+import { $optionalMatchNode } from "@cypher/operations/$matchNode";
+import { $where } from "@cypher/operations/$where";
 import { equals, isNull } from "@cypher/expression/operators";
 import { propUnsafe } from "@cypher/expression/prop";
-import { $throwIf } from "@cypher/stages/procedures/$throwIf";
+import { $throwIf } from "@cypher/operations/procedures/$throwIf";
 import { forceType } from "@cypher/expression/casting";
 import {
   AbstractNodeDefinitionClass,

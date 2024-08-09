@@ -1,4 +1,4 @@
-import { $match, $optionalMatch } from "@cypher/stages/$match";
+import { $match, $optionalMatch } from "@cypher/operations/$match";
 import { pattern } from "@cypher/pattern/match-pattern-builder";
 import { Optional } from "@cypher/types/optional";
 import { ApplyDataMergeString, DataMergeString } from "@core/data-merge-string";

@@ -1,6 +1,6 @@
 import { QueryData } from "@core/query-data";
 import { Query, query_untyped } from "@core/query";
-import { $first } from "@cypher/stages/$first";
+import { $first } from "@cypher/operations/$first";
 
 export const first = <TData extends QueryData>(
   inputQuery: Query<TData, any>,

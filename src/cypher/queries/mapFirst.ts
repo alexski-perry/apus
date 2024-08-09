@@ -1,7 +1,7 @@
-import { Mapping, ParseMapping } from "@cypher/stages/$map";
+import { Mapping, ParseMapping } from "@cypher/operations/$map";
 import { QueryData } from "@core/query-data";
 import { Query, query_untyped } from "@core/query";
-import { $first } from "@cypher/stages/$first";
+import { $first } from "@cypher/operations/$first";
 
 export const mapFirst = <TDataIn extends QueryData, TMapping extends Mapping<"1->1">>(
   inputQuery: Query<TDataIn, any>,

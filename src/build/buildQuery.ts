@@ -12,7 +12,7 @@ import { Any } from "@cypher/types/any";
 import { expression } from "@core/expression";
 import { QueryCardinality } from "@core/query-cardinality";
 import { QueryOperationResolveInfo } from "@build/QueryOperationResolveInfo";
-import { $map } from "@cypher/stages/$map";
+import { $map } from "@cypher/operations/$map";
 import { DataShape, mapDataShape, mergeDataShape } from "@core/data-shape";
 
 export interface Environment {

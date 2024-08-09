@@ -1,7 +1,7 @@
-import { $where, Predicates } from "@cypher/stages/$where";
+import { $where, Predicates } from "@cypher/operations/$where";
 import { QueryData } from "@core/query-data";
 import { Query, query_untyped } from "@core/query";
-import { $first } from "@cypher/stages/$first";
+import { $first } from "@cypher/operations/$first";
 
 export const firstFiltered = <TData extends QueryData>(
   inputQuery: Query<TData, any>,

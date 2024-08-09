@@ -1,4 +1,4 @@
-import { $paginate, PaginateData } from "@cypher/stages/$paginate";
+import { $paginate, PaginateData } from "@cypher/operations/$paginate";
 import { QueryData } from "@core/query-data";
 import { QueryCardinality } from "@core/query-cardinality";
 import { Query, query_untyped } from "@core/query";

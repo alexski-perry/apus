@@ -1,6 +1,6 @@
-import { $where, Predicates } from "@cypher/stages/$where";
+import { $where, Predicates } from "@cypher/operations/$where";
 import { query_untyped } from "@core/query";
-import { $matchNode } from "@cypher/stages/$matchNode";
+import { $matchNode } from "@cypher/operations/$matchNode";
 import {
   AbstractNodeDefinitionClass,
   NodeDefinitionClass,

@@ -1,6 +1,6 @@
 export { collect } from "@cypher/queries/collect";
 export { createNode } from "@cypher/queries/createNode";
-export { $deleteNode } from "@cypher/stages/$deleteNode";
+export { $deleteNode } from "@cypher/operations/$deleteNode";
 export { filter } from "@cypher/queries/filter";
 export { findAll } from "@cypher/queries/findAll";
 export { findAllByIDs } from "@cypher/queries/findAllByIDs";

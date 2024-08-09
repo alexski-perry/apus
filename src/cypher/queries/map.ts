@@ -1,4 +1,4 @@
-import { Mapping, ParseMapping } from "../stages/$map";
+import { Mapping, ParseMapping } from "@cypher/operations/$map";
 import { QueryData } from "@core/query-data";
 import { QueryCardinality } from "@core/query-cardinality";
 import { Query, query_untyped } from "@core/query";

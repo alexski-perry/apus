@@ -1,4 +1,4 @@
-import { $callProcedure } from "@cypher/stages/$callProcedure";
+import { $callProcedure } from "@cypher/operations/$callProcedure";
 import { expression } from "@core/expression";
 import { QueryOperation } from "@core/query-operation";
 import { Any } from "@cypher/types/any";

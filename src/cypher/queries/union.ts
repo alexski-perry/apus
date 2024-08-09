@@ -1,5 +1,5 @@
 import { FlatNarrow } from "@utils/FlatNarrow";
-import { $unionSubquery } from "@cypher/stages/$unionSubquery";
+import { $unionSubquery } from "@cypher/operations/$unionSubquery";
 import { GetQueryCardinality, GetQueryData, Query, query_untyped } from "@core/query";
 
 export const union = <T extends Array<Query<any, any>>>(

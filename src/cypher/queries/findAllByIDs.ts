@@ -1,6 +1,6 @@
 import { propUnsafe } from "@cypher/expression/prop";
 import { findAll } from "@cypher/queries/findAll";
-import { $where } from "@cypher/stages/$where";
+import { $where } from "@cypher/operations/$where";
 import { inList } from "@cypher/expression/operators";
 import {
   AbstractNodeDefinitionClass,
