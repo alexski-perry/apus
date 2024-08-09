@@ -81,12 +81,6 @@ export function simplifyClauses(prevClauses: Clause[]): Clause[] {
     } else if (clause.type === "SKIP") {
       const needsWith =
         !(lastClause?.type === "WITH") &&
-        !(lastClause?.type === "WHERE" && secondLastClause?.type === "WITH") &&
-        !(
-          lastClause?.type === "ORDER BY" &&
-          secondLastClause?.type === "WHERE" &&
-          thirdLastClause?.type === "WITH"
-        ) &&
         !(lastClause?.type === "ORDER BY" && secondLastClause?.type === "WITH");
 
       if (needsWith) addWildcardWith();
@@ -96,12 +90,6 @@ export function simplifyClauses(prevClauses: Clause[]): Clause[] {
       const needsWith =
         !(lastClause?.type === "SKIP") &&
         !(lastClause?.type === "WITH") &&
-        !(lastClause?.type === "WHERE" && secondLastClause?.type === "WITH") &&
-        !(
-          lastClause?.type === "ORDER BY" &&
-          secondLastClause?.type === "WHERE" &&
-          thirdLastClause?.type === "WITH"
-        ) &&
         !(lastClause?.type === "ORDER BY" && secondLastClause?.type === "WITH");
 
       if (needsWith) addWildcardWith();
