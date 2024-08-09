@@ -1,5 +1,19 @@
 # @alexski-perry/apus
 
+## 0.1.0
+
+### Minor Changes
+
+- 9e76dd2: Fix $first
+- 27d750c: Fix expressionFromQueryData so it uses correct map type
+- 27d750c: Fix GetQueryOutput to properly handle 'none-or-one' queries
+- cf827b8: Add pick utility
+- cf827b8: Add additional overrides to makeQueryRunner
+
+### Patch Changes
+
+- 628c752: Rename stages folder to operations
+
 ## 0.0.6
 
 ### Patch Changes
