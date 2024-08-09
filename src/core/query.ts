@@ -229,8 +229,8 @@ export type GetQueryOutput<
   TCardinality extends QueryCardinality,
 > = TCardinality extends "many"
   ? Array<GetQueryDataOutputType<TData>>
-  : TCardinality extends "optional"
-    ? GetQueryDataOutputType<TData> | undefined
+  : TCardinality extends "none-or-one"
+    ? GetQueryDataOutputType<TData> | null
     : GetQueryDataOutputType<TData>;
 
 /**
