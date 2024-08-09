@@ -18,5 +18,5 @@ export const makeTransformer =
       });
     });
 
-    return cardinality === "one" ? outputAsArray[0] : outputAsArray;
+    return cardinality === "many" ? outputAsArray : outputAsArray[0] ?? null;
   };
