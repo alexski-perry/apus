@@ -1,5 +1,12 @@
 # @alexski-perry/apus
 
+## 0.1.1
+
+### Patch Changes
+
+- 55070af: Fix makeTransformer so it handles all cardinalities correctly
+- ea16ae3: Fix query simplifier to not allow LIMIT/SKIP after WHERE
+
 ## 0.1.0
 
 ### Minor Changes
