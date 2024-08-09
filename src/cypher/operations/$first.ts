@@ -10,7 +10,7 @@ export const $first = (): QueryOperation<void, "force-none-or-one", "merge"> => 
       return {
         clauses: [limitClause(resolveInfo.resolveValue(expression(Int)`1`))],
         outputShape: undefined,
-        cardinalityBehaviour: "force-one",
+        cardinalityBehaviour: "force-none-or-one",
         dataBehaviour: "merge",
       };
     },
