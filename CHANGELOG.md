@@ -1,5 +1,12 @@
 # @alexski-perry/apus
 
+## 0.2.0
+
+### Minor Changes
+
+- e62ab6c: Add 'toDate' function
+- e62ab6c: Allow 'collectAgg' to take plain object
+
 ## 0.1.1
 
 ### Patch Changes
