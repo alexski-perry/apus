@@ -21,7 +21,7 @@ export type TupleQueryData = [Value, Value] | [Value, Value, Value];
 export const isQueryDataMap = (val: QueryData): val is QueryDataMap =>
   !!val && !(val instanceof Value) && !Array.isArray(val);
 
-/**
+/*
  * Guard for TupleQueryData
  */
 export const isTupleQueryData = (val: QueryData): val is TupleQueryData =>
