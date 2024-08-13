@@ -1,6 +1,6 @@
-import {Relationship, RelationshipValue} from "@cypher/types/structural/relationship";
-import {Node, NodeValue} from "@cypher/types/structural/node";
-import {Map} from "@cypher/types/map";
+import { Relationship, RelationshipValue } from "@cypher/types/structural/relationship";
+import { Node, NodeValue } from "@cypher/types/structural/node";
+import { Map } from "@cypher/types/map";
 import {
   AbstractNodeDefinition,
   AbstractRelationshipDefinition,
@@ -8,22 +8,22 @@ import {
   PropertyDefinition,
   RelationshipDefinition,
 } from "@schema/definition";
-import {expression} from "@core/expression";
-import {loadModel} from "@schema/loadModel";
-import {TypeOf} from "@core/type/type";
-import {Any} from "@cypher/types/any";
-import {Value} from "@core/value";
-import {getModelDebugName} from "@schema/utils";
-import {Optional} from "@cypher/types/optional";
-import {ID} from "@cypher/types/scalar/id";
-import {Id} from "@utils/Id";
+import { expression } from "@core/expression";
+import { loadModel } from "@schema/loadModel";
+import { TypeOf } from "@core/type/type";
+import { Any } from "@cypher/types/any";
+import { Value } from "@core/value";
+import { getModelDebugName } from "@schema/utils";
+import { Optional } from "@cypher/types/optional";
+import { Id } from "@utils/Id";
 
 /**
  *  Property access for a strongly typed node, relationship or map
  */
 // todo support optionals???
 export function prop<
-  T extends | Node<NodeDefinition | AbstractNodeDefinition>
+  T extends
+    | Node<NodeDefinition | AbstractNodeDefinition>
     | Relationship<RelationshipDefinition | AbstractRelationshipDefinition>
     | Map,
   K extends AllowedProperties<T>,
@@ -96,12 +96,12 @@ export function propUnsafe<T extends Value = Any>(
 }
 
 export function pick<
-  T extends | Node<NodeDefinition | AbstractNodeDefinition>
+  T extends
+    | Node<NodeDefinition | AbstractNodeDefinition>
     | Relationship<RelationshipDefinition | AbstractRelationshipDefinition>
     | Map,
   K extends Array<AllowedProperties<T>>,
 >(value: T, ...keys: K): Id<PickProperties<T, K>> {
-
   const obj: Record<string, any> = {};
   const seenKeys = new Set<string>();
 
@@ -118,12 +118,14 @@ export function pick<
 // INTERNAL HELPERS
 
 type PickProperties<
-  T extends | Node<NodeDefinition | AbstractNodeDefinition>
+  T extends
+    | Node<NodeDefinition | AbstractNodeDefinition>
     | Relationship<RelationshipDefinition | AbstractRelationshipDefinition>
     | Map,
-  TKeys extends Array<AllowedProperties<T>>> = {
-  [K in TKeys[number]]: PropertyType<T, K>
-}
+  TKeys extends Array<AllowedProperties<T>>,
+> = {
+  [K in TKeys[number]]: PropertyType<T, K>;
+};
 
 type AllowedProperties<T extends Node | Relationship | Map> = T extends Node<infer TNodeDef>
   ? TNodeDef extends NodeDefinition | AbstractNodeDefinition
@@ -138,8 +140,8 @@ type AllowedProperties<T extends Node | Relationship | Map> = T extends Node<inf
       : never;
 
 type PropertyType<T extends Node | Relationship | Map, K extends string> = T extends Node<
-    infer TNodeDef
-  >
+  infer TNodeDef
+>
   ? TNodeDef extends NodeDefinition | AbstractNodeDefinition
     ? K extends keyof TypedNodeProperties<TNodeDef>
       ? TypedNodeProperties<TNodeDef>[K]
@@ -174,4 +176,3 @@ type TypedRelationshipProperties<
 type PropertyKeyFilter<T, K extends keyof T> = T[K] extends PropertyDefinition<any>
   ? K
   : never;
-

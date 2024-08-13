@@ -1,12 +1,11 @@
 import { Value } from "@core/value";
 import { typeOf, TypeOf } from "@core/type/type";
 import { Optional } from "@cypher/types/optional";
-import { expression } from "@core/expression";
 
 /**
  *  Create a value with a new type but the original ValueData
  */
-export const forceType = <T extends Value>(value: Value, as: TypeOf<T>): T => {
+export function forceType<T extends Value>(value: Value, as: TypeOf<T>): T {
   return Value.create(
     as,
     { ...Value.getValueInfo(value), type: as },
@@ -15,24 +14,24 @@ export const forceType = <T extends Value>(value: Value, as: TypeOf<T>): T => {
     // if we check it, but the old variable will be present and be checked, as we would want
     new Set(Value.getDependencies(value)),
   );
-};
+}
 
-export const forceOptional = <T extends Value>(
+export function forceOptional<T extends Value>(
   value: T,
-): T extends Optional<any> ? T : Optional<T> => {
+): T extends Optional<any> ? T : Optional<T> {
   if (value instanceof Optional) {
     return value as any;
   } else {
     return forceType(value, Optional.makeType(typeOf(value))) as any;
   }
-};
+}
 
-export const forceNotOptional = <T extends Value>(
+export function forceNotOptional<T extends Value>(
   value: T,
-): T extends Optional<infer TInner> ? TInner : T => {
+): T extends Optional<infer TInner> ? TInner : T {
   if (value instanceof Optional) {
     return forceType(value, Optional.getInnerType(value)) as any;
   } else {
     return value as any;
   }
-};
+}
