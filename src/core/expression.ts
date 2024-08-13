@@ -3,9 +3,9 @@ import { Map } from "@cypher/types/map";
 import { Pair } from "@cypher/types/pair";
 import { Triple } from "@cypher/types/triple";
 import { ExpressionPrintFn } from "@core/value-info";
-import {Type, typeOf} from "@core/type/type";
+import { Type, typeOf } from "@core/type/type";
 import { Value } from "@core/value";
-import {isQueryDataMap, isTupleQueryData, mapQueryData, QueryData} from "@core/query-data";
+import { isQueryDataMap, isTupleQueryData, mapQueryData, QueryData } from "@core/query-data";
 import { Any } from "@cypher/types/any";
 
 export const expression = <T extends Value>(type: ConstructorOf<T>) => {
@@ -176,14 +176,10 @@ const parseExpressionTemplate = (
   const dependencies = new Set<Value>();
   inputs.forEach(input => {
     if (input instanceof Value) {
-      const valueData = Value.getValueInfo(input);
-      if (valueData.kind === "variable") {
-        dependencies.add(input);
-      } else if (valueData.kind === "expression") {
-        for (const dep of Value.getDependencies(input)) {
-          dependencies.add(dep);
-        }
-      }
+      const innerDeps = Value.getDependencies(input);
+      innerDeps.forEach(dep => {
+        dependencies.add(dep);
+      });
     }
   });
 
