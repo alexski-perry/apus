@@ -58,6 +58,7 @@ export const buildSubquery = (
   outerScopeEnvironment: Environment,
   options?: { noReturn?: boolean },
 ) => {
+  const { noReturn = false } = options ?? {};
   const { input, stages } = Query.resolve(query);
 
   const inputVariables: Array<Variable> = [];
@@ -95,7 +96,9 @@ export const buildSubquery = (
     environment = applyStage(stage, environment);
   }
 
-  environment = applyReturn(environment);
+  if (!noReturn) {
+    environment = applyReturn(environment);
+  }
 
   return {
     cardinality: environment.cardinality,

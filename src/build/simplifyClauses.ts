@@ -10,7 +10,6 @@ export function simplifyClauses(prevClauses: Clause[]): Clause[] {
   for (const clause of prevClauses) {
     const lastClause = clauses[clauses.length - 1];
     const secondLastClause = clauses[clauses.length - 2];
-    const thirdLastClause = clauses[clauses.length - 3];
 
     if (lastClause?.type === "RETURN") {
       throw new Error("can't add clause after RETURN");

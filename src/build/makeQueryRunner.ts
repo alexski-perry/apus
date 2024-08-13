@@ -17,10 +17,7 @@ export interface MakeQueryRunnerOptions {
 
 export function makeQueryRunner(options: MakeQueryRunnerOptions): QueryRunner {
   const { execute } = options;
-
   return async (...stages: Array<QueryStageOrInput>) => {
-    const start = performance.now();
-
     const { params, queryString, outputShape, cardinality } = buildRootQuery(
       query_untyped(...stages),
       {
