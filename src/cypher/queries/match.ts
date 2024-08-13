@@ -16,30 +16,46 @@ import { Value } from "@core/value";
 
 // todo do other queries same as match
 
-export const matchNode = <
+export function matchNode<
   TDef extends
     | string
     | NodeDefinitionClass
     | AbstractNodeDefinitionClass
     | NodeUnionDefinitionClass,
->(
-  node: TDef,
-): Query<Node<DefinitionFromClass<TDef>>, "many"> => query_untyped(() => $matchNode(node));
+>(node: TDef): Query<Node<DefinitionFromClass<TDef>>, "many"> {
+  return query_untyped(() => $matchNode(node));
+}
 
-export const optionalMatchNode = <
+export function optionalMatchNode<
   TDef extends
     | string
     | NodeDefinitionClass
     | AbstractNodeDefinitionClass
     | NodeUnionDefinitionClass,
->(
-  node: TDef,
-): Query<Node<DefinitionFromClass<TDef>>, "many"> =>
-  query_untyped(() => $optionalMatchNode(node));
+>(node: TDef): Query<Node<DefinitionFromClass<TDef>>, "many"> {
+  return query_untyped(() => $optionalMatchNode(node));
+}
 
-export const match = <TPattern extends MatchPattern<any, any>>(
+export function match<TPattern extends MatchPattern<any, any>>(
+  pattern: TPattern,
+): Query<GetMatchPatternData<TPattern>, GetMatchPatternCardinality<TPattern>> {
+  return makeMatchQuery(pattern, false);
+}
+
+export const optionalMatch = <TPattern extends MatchPattern<any, any>>(
   pattern: TPattern,
 ): Query<GetMatchPatternData<TPattern>, GetMatchPatternCardinality<TPattern>> => {
+  return makeMatchQuery(pattern, true);
+};
+
+/*
+  INTERNAL
+ */
+
+function makeMatchQuery(
+  pattern: MatchPattern<any, any>,
+  isOptional: boolean,
+): Query<any, any> {
   let i = 0;
   const input: Record<string, Value> = {};
   const keyMap = new Map<Value, string>();
@@ -68,10 +84,6 @@ export const match = <TPattern extends MatchPattern<any, any>>(
     });
   }
 
-  return query_untyped(input, data => $match(makeNewPattern(data)));
-};
-
-export const optionalMatch = <TPattern extends MatchPattern<any, any>>(
-  pattern: TPattern,
-): Query<GetMatchPatternData<TPattern>, GetMatchPatternCardinality<TPattern>> =>
-  query_untyped(() => $optionalMatch(pattern));
+  const $matchOp = isOptional ? $optionalMatch : $match;
+  return query_untyped(input, data => $matchOp(makeNewPattern(data)));
+}
