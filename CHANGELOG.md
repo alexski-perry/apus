@@ -1,5 +1,21 @@
 # @alexski-perry/apus
 
+## 0.3.0
+
+### Minor Changes
+
+- c13dde7: Add 'matchRelation', add 'optionalMatchRelation' and rewrite 'project'; all to work only with RelationPattern
+- c13dde7: Rename $matchOptional to $matchNoneOrOne, and add $matchOneOrMore
+- c13dde7: Add 'maybe' function for mapping optional values
+- c13dde7: Refactor cardinality system, and add new cardinality 'one-or-more'
+
+### Patch Changes
+
+- c13dde7: Remove cardinality from MatchPattern
+- c13dde7: Fixes to optionalMatch
+- c13dde7: Remove leftover loggings (finally!)
+- c13dde7: Fix dependency tracking for expressions
+
 ## 0.2.0
 
 ### Minor Changes
