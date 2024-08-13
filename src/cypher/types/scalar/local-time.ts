@@ -6,13 +6,24 @@ import { ScalarValue } from "@cypher/types/scalar";
 export class LocalTime extends ScalarValue<
   "LocalTime",
   Date | Neo4jLocalTime<number>,
-  Neo4jLocalTime<number>
+  {
+    hour: number;
+    minute: number;
+    second: number;
+    nanosecond: number;
+  }
 > {}
 
 setTypeInfo(LocalTime, {
   parseValue: value => {
-    if (!(value instanceof Neo4jLocalTime)) return undefined;
-    return value;
+    if (value instanceof Neo4jLocalTime) {
+      return {
+        hour: value.hour,
+        minute: value.minute,
+        second: value.second,
+        nanosecond: value.nanosecond,
+      };
+    }
   },
   serialize: value => {
     if (isValidDate(value)) return Neo4jLocalTime.fromStandardDate(value);

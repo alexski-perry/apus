@@ -3,16 +3,13 @@ import { isValidDate } from "@utils/isValidDate";
 import { setTypeInfo } from "@core/type/type-info";
 import { ScalarValue } from "@cypher/types/scalar";
 
-export class DateTime extends ScalarValue<
-  "DateTime",
-  Date | Neo4jDateTime<number>,
-  Neo4jDateTime<number>
-> {}
+export class DateTime extends ScalarValue<"DateTime", Date | Neo4jDateTime<number>, Date> {}
 
 setTypeInfo(DateTime, {
   parseValue: value => {
-    if (!(value instanceof Neo4jDateTime)) return undefined;
-    return value;
+    if (value instanceof Neo4jDateTime) {
+      return value.toStandardDate();
+    }
   },
   serialize: value => {
     if (isValidDate(value)) return Neo4jDateTime.fromStandardDate(value);

@@ -129,13 +129,3 @@ export const serializeNeo4jValue = (value: any): Neo4jParamValue | undefined => 
     return output;
   }
 };
-
-// export const isSerializableValue = (val: any): val is string | number | bigint | boolean | Date => {
-//   return (
-//     typeof val === "string" ||
-//     typeof val === "number" ||
-//     typeof val === "boolean" ||
-//     typeof val === "bigint" ||
-//     isValidDate(val)
-//   );
-// };
