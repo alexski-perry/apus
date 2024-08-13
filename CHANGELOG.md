@@ -1,5 +1,20 @@
 # @alexski-perry/apus
 
+## 0.4.0
+
+### Minor Changes
+
+- cbcb4c8: Stop outing Neo4j temporal types (prefer standard Date, or new 'time objects')
+- cbcb4c8: Add `mapMaybe`
+- cbcb4c8: Change cardinality of $where to be less forgiving (change to '<-many')
+- cbcb4c8: Make `project` use `mapMaybe`
+- cbcb4c8: Add nullConst function
+
+### Patch Changes
+
+- cbcb4c8: Fix typo in $optionalMatchNode
+- cbcb4c8: Respect noReturn option in buildSubquery
+
 ## 0.3.0
 
 ### Minor Changes
