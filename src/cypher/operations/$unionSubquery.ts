@@ -7,7 +7,7 @@ import { GetQueryData, Query, query_untyped } from "@core/query";
 import { Union } from "@cypher/types/union";
 import { QueryOperation, queryOperation } from "@core/query-operation";
 
-export const $unionSubquery = <TRef extends DataMergeString, T extends Array<Query<any, any>>>(
+export function $unionSubquery<TRef extends DataMergeString, T extends Array<Query<any, any>>>(
   ref: TRef,
   queries: FlatNarrow<T>,
 ): QueryOperation<
@@ -16,7 +16,7 @@ export const $unionSubquery = <TRef extends DataMergeString, T extends Array<Que
   }[number],
   "!many", // todo more precise cardinality?
   "merge"
-> => {
+> {
   return queryOperation({
     name: "$unionSubquery",
     resolver: resolveInfo => {
@@ -50,4 +50,4 @@ export const $unionSubquery = <TRef extends DataMergeString, T extends Array<Que
       };
     },
   });
-};
+}
