@@ -29,12 +29,7 @@ export function makeQueryRunner(options: MakeQueryRunnerOptions): QueryRunner {
     );
 
     const transformer = makeTransformer({ outputShape, cardinality });
-    const buildEnd = performance.now();
     const queryResult = execute(queryString, params);
-
-    const end = performance.now();
-    console.log(`BUILD TIME: ${buildEnd - start}ms`);
-    console.log(`TOTAL EXECUTION TIME: ${end - start}ms`);
     return transformer(await queryResult);
   };
 }
