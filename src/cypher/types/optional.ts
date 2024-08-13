@@ -38,7 +38,7 @@ export const optional = Optional.makeType;
 
 // UTILITY TYPES
 
-export type MakeOptional<T extends Value> = T extends Optional<any> ? T : T;
+export type MakeOptional<T extends Value> = T extends Optional<any> ? T : Optional<T>;
 
 /**
  *  Forces the given type to be non-optional

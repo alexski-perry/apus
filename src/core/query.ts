@@ -1,12 +1,12 @@
 import { Mapping, ParseMapping } from "@cypher/operations/$map";
-import { GetQueryDataOutputType, MergeQueryData, QueryData } from "@core/query-data";
-import { QueryCardinality } from "@core/query-cardinality";
+import { GetQueryDataOutputType, QueryData } from "@core/query-data";
+import { MergeQueryCardinality, QueryCardinality } from "@core/query-cardinality";
 import {
+  ApplyCardinalityBehaviour,
+  ApplyDataBehaviour,
+  OperationCardinalityBehaviour,
   QueryOperation,
-  StageCardinalityBehaviour,
-  StageDataBehaviour,
 } from "@core/query-operation";
-import {an} from "vitest/dist/chunks/reporters.C_zwCd4j";
 
 export function query<
   T1 extends QueryInput,
@@ -125,7 +125,7 @@ export function query_untyped(
 }
 
 export type QueryStage<TInput extends QueryData> = (input: TInput) => QueryStageResult;
-export type QueryStageResult = QueryOperation<any, any, any> | Mapping<"1->1">;
+export type QueryStageResult = QueryOperation<any, any, any> | Mapping<"->one">;
 
 export type QueryInput = Query<any, any> | QueryData | QueryStage<void>;
 export type QueryInputResult = Query<any, any> | QueryData | QueryOperation<any, any, any>;
@@ -145,14 +145,12 @@ export type CalculateStageData<
 type CalculateStageDataHelper<
   TIn extends QueryData,
   TOut extends QueryStageOrInputResult,
-> = TOut extends Mapping<"1->1">
+> = TOut extends Mapping<"->one">
   ? ParseMapping<TOut>
-  : TOut extends Query<infer TData, QueryCardinality>
+  : TOut extends Query<infer TData>
     ? TData
-    : TOut extends QueryOperation<infer TData, StageCardinalityBehaviour, infer TType>
-      ? TType extends "merge"
-        ? MergeQueryData<TIn, TData>
-        : TData
+    : TOut extends QueryOperation<infer TData, OperationCardinalityBehaviour, infer TBehaviour>
+      ? ApplyDataBehaviour<TIn, TData, TBehaviour>
       : never;
 
 export type CalculateStageCardinality<
@@ -167,38 +165,26 @@ export type CalculateStageCardinality<
 type CalculateStageCardinalityHelper<
   TIn extends QueryCardinality,
   TOut extends QueryStageResult | QueryInputResult,
-> = TOut extends Mapping<"1->1">
+> = TOut extends Mapping<"->one">
   ? TIn
   : TOut extends Query<QueryData, infer TCardinality>
-    ? {
-        one: TIn;
-        "none-or-one": {
-          one: "none-or-one";
-          "none-or-one": "none-or-one";
-          many: "many";
-        }[TIn];
-        many: "many";
-      }[TCardinality]
-    : TOut extends QueryOperation<QueryData, infer TCardinalityBehaviour, StageDataBehaviour>
-      ? {
-          same: TIn;
-          optional: {
-            one: "none-or-one";
-            "none-or-one": "none-or-one";
-            many: "many";
-          }[TIn];
-          "force-none-or-one": "none-or-one";
-          "force-one": "one";
-          "force-many": "many";
-        }[TCardinalityBehaviour]
+    ? MergeQueryCardinality<TIn, TCardinality>
+    : TOut extends QueryOperation<QueryData, infer TBehaviour>
+      ? ApplyCardinalityBehaviour<TIn, TBehaviour>
       : never;
 
-export class Query<TData extends QueryData, TCardinality extends QueryCardinality> {
+export class Query<
+  TData extends QueryData = QueryData,
+  TCardinality extends QueryCardinality = QueryCardinality,
+> {
   protected _typeInfo: [TData, TCardinality] = null as any;
 
   constructor(private _stages: Array<QueryStageOrInput>) {}
 
-  static resolve(query: Query<any, any>): QueryInfo {
+  static resolve(query: Query<any, any>): {
+    input: QueryData;
+    stages: Array<QueryStage<any>>;
+  } {
     let stages = query._stages;
     let input: QueryData = undefined;
 
@@ -214,11 +200,6 @@ export class Query<TData extends QueryData, TCardinality extends QueryCardinalit
 
     return { input, stages: stages as Array<QueryStage<any>> };
   }
-}
-
-export interface QueryInfo {
-  input: QueryData;
-  stages: Array<QueryStage<any>>;
 }
 
 /**

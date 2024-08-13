@@ -9,7 +9,7 @@ export type PaginateData = {
   skip?: number | Int;
 };
 
-export const $paginate = (config: PaginateData): QueryOperation<void, "same", "merge"> => {
+export const $paginate = (config: PaginateData): QueryOperation<void, "<-many", "merge"> => {
   return queryOperation({
     name: "$paginate",
     resolver: resolveInfo => {
@@ -26,7 +26,7 @@ export const $paginate = (config: PaginateData): QueryOperation<void, "same", "m
       return {
         clauses,
         outputShape: undefined,
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "<-many",
         dataBehaviour: "merge",
       };
     },

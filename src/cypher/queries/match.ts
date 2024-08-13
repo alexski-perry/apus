@@ -1,8 +1,4 @@
-import {
-  GetMatchPatternCardinality,
-  GetMatchPatternData,
-  MatchPattern,
-} from "@core/pattern/match-pattern";
+import { GetMatchPatternData, MatchPattern } from "@core/pattern/match-pattern";
 import { Query, query_untyped } from "@core/query";
 import { $match, $matchNode, $optionalMatch, $optionalMatchNode } from "neo4j-querier/stages";
 import {
@@ -13,8 +9,9 @@ import {
 import { Node } from "@cypher/types/structural/node";
 import { DefinitionFromClass } from "@schema/utils";
 import { Value } from "@core/value";
-
-// todo do other queries same as match
+import { MakeQueryDataOptional } from "@core/query-data";
+import { Float } from "@cypher/types/scalar/float";
+import { MakeOptional } from "@cypher/types/optional";
 
 export function matchNode<
   TDef extends
@@ -36,15 +33,15 @@ export function optionalMatchNode<
   return query_untyped(() => $optionalMatchNode(node));
 }
 
-export function match<TPattern extends MatchPattern<any, any>>(
+export function match<TPattern extends MatchPattern>(
   pattern: TPattern,
-): Query<GetMatchPatternData<TPattern>, GetMatchPatternCardinality<TPattern>> {
+): Query<GetMatchPatternData<TPattern>, "many"> {
   return makeMatchQuery(pattern, false);
 }
 
-export const optionalMatch = <TPattern extends MatchPattern<any, any>>(
+export const optionalMatch = <TPattern extends MatchPattern>(
   pattern: TPattern,
-): Query<GetMatchPatternData<TPattern>, GetMatchPatternCardinality<TPattern>> => {
+): Query<MakeQueryDataOptional<GetMatchPatternData<TPattern>>, "one-or-more"> => {
   return makeMatchQuery(pattern, true);
 };
 
@@ -52,14 +49,11 @@ export const optionalMatch = <TPattern extends MatchPattern<any, any>>(
   INTERNAL
  */
 
-function makeMatchQuery(
-  pattern: MatchPattern<any, any>,
-  isOptional: boolean,
-): Query<any, any> {
+function makeMatchQuery(pattern: MatchPattern, isOptional: boolean): Query<any, any> {
   let i = 0;
   const input: Record<string, Value> = {};
   const keyMap = new Map<Value, string>();
-  const { parts, cardinality, outputShape } = MatchPattern.getData(pattern);
+  const { parts, outputShape } = MatchPattern.getData(pattern);
 
   parts.forEach(part => {
     if (part.value instanceof Value) {
@@ -69,8 +63,8 @@ function makeMatchQuery(
     }
   });
 
-  function makeNewPattern(data: Record<string, Value>): MatchPattern<any, any> {
-    return new MatchPattern({
+  const makeNewPattern = (data: Record<string, Value>) =>
+    new MatchPattern({
       parts: parts.map(part =>
         part.value instanceof Value
           ? {
@@ -79,10 +73,8 @@ function makeMatchQuery(
             }
           : part,
       ),
-      cardinality,
       outputShape,
     });
-  }
 
   const $matchOp = isOptional ? $optionalMatch : $match;
   return query_untyped(input, data => $matchOp(makeNewPattern(data)));

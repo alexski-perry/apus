@@ -16,22 +16,17 @@ export class RelationPattern<
   TNode extends NodeDefinition | AbstractNodeDefinition | NodeUnionDefinition,
   TRelationship extends RelationshipDefinition,
   TCardinality extends RelationCardinality,
-> extends MatchPattern<Node<TNode>, ConvertRelationCardinality<TCardinality>> {
-  public withRelationship: MatchPattern<
-    [Node<TNode>, Relationship<TRelationship>],
-    ConvertRelationCardinality<TCardinality>
-  >;
+> extends MatchPattern<Node<TNode>> {
+  private _cardinalityTag: TCardinality = null as any;
+  public withRelationship: MatchPattern<[Node<TNode>, Relationship<TRelationship>]>;
 
-  constructor(from: NodeValue, model: RelationModel) {
+  constructor(
+    from: NodeValue,
+    private model: RelationModel,
+  ) {
     const toNodeVariable = patternVariableDeclaration(
       NodeValue.makeType(getDefinitionClass(model.to)),
     );
-
-    const cardinality = {
-      one: "one" as const,
-      optional: "none-or-one" as const,
-      many: "many" as const,
-    }[model.cardinality];
 
     super({
       outputShape: toNodeVariable,
@@ -53,7 +48,6 @@ export class RelationPattern<
           nodeLabels: getNodeLabelsForMatching(model.to),
         },
       ],
-      cardinality,
     });
 
     const relationshipVariable = patternVariableDeclaration(
@@ -80,13 +74,23 @@ export class RelationPattern<
           nodeLabels: getNodeLabelsForMatching(model.to),
         },
       ],
-      cardinality,
     });
+  }
+
+  static getModel(relationPattern: RelationPattern<any, any, any>) {
+    return relationPattern.model;
   }
 }
 
-type ConvertRelationCardinality<T extends RelationCardinality> = {
+export type ConvertRelationCardinality<T extends RelationCardinality> = {
   one: "one";
   optional: "none-or-one";
   many: "many";
 }[T];
+
+export type GetRelationPatternCardinality<T extends RelationPattern<any, any, any>> =
+  T extends RelationPattern<any, any, infer TCardinality>
+    ? TCardinality extends RelationCardinality
+      ? TCardinality
+      : never
+    : never;

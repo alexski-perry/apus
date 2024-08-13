@@ -6,6 +6,10 @@ import { Map } from "@cypher/types/map";
 import { Pair } from "@cypher/types/pair";
 import { Triple } from "@cypher/types/triple";
 import { MakeOptional } from "@cypher/types/optional";
+import { forceNotOptional, forceOptional } from "@cypher";
+import { DataShape } from "@core/data-shape";
+import { Type } from "@core/type/type";
+import { Deconstruct } from "@utils/deconstruct";
 
 export type QueryData = void | Value | QueryDataMap | TupleQueryData;
 
@@ -34,11 +38,19 @@ export const isTupleQueryData = (val: QueryData): val is TupleQueryData =>
 export const mapQueryData = <T>(data: QueryData, f: (data: Value) => T): any =>
   deepMap(data, el => el instanceof Value, f);
 
+export function forceQueryDataOptional(data: QueryData): QueryData {
+  return mapQueryData(data, value => forceOptional(value));
+}
+
+export function forceQueryDataNonOptional(data: QueryData): QueryData {
+  return mapQueryData(data, value => forceNotOptional(value));
+}
+
 /**
  * Runs `f` on each `Value` held in the QueryData, mapping it and
  * returning it in the original shape
  */
-export const flattenQueryData = (data: QueryData): Array<Value> => {
+export function flattenQueryData(data: QueryData): Array<Value> {
   const allValues: Value[] = [];
 
   deepMap(
@@ -55,17 +67,19 @@ export const flattenQueryData = (data: QueryData): Array<Value> => {
   );
 
   return allValues;
-};
+}
 
 /**
  * Merges `input` and `output` according to the QueryData merging rules
  */
-export const mergeQueryData = (input: QueryData, output: QueryData): QueryData =>
-  isQueryDataMap(input) && isQueryDataMap(output)
+export function mergeQueryData(input: QueryData, output: QueryData): QueryData {
+  return isQueryDataMap(input) && isQueryDataMap(output)
     ? { ...input, ...output }
     : output === undefined
       ? input
       : output;
+}
+
 /**
  * Merges `TInput` and `TOutput` according to the QueryData merging rules
  */

@@ -4,7 +4,11 @@ import { QueryOperation, queryOperation } from "@core/query-operation";
 
 export const $create = <TPattern extends CreationPattern<any>>(
   pattern: TPattern,
-): CreateOperation<TPattern> => {
+): QueryOperation<
+  TPattern extends CreationPattern<infer TData> ? TData : never,
+  "->one",
+  "merge"
+> => {
   return queryOperation({
     name: "$create",
     resolver: resolveInfo => {
@@ -15,15 +19,9 @@ export const $create = <TPattern extends CreationPattern<any>>(
       return {
         clauses: [createClause([clausePattern])],
         outputShape: dataShape,
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "->one",
         dataBehaviour: "merge",
       };
     },
   });
 };
-
-type CreateOperation<TPattern extends CreationPattern<any>> = QueryOperation<
-  TPattern extends CreationPattern<infer TData> ? TData : never,
-  "same",
-  "merge"
->;

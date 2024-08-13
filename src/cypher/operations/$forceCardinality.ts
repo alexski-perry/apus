@@ -6,9 +6,10 @@ export const $forceCardinality = <TCardinality extends QueryCardinality>(
 ): QueryOperation<
   void,
   {
-    one: "force-one";
-    "none-or-one": "force-none-or-one";
-    many: "force-many";
+    one: "!one";
+    "none-or-one": "!none-or-one";
+    "one-or-more": "!one-or-more";
+    many: "!many";
   }[TCardinality],
   "merge"
 > => {
@@ -19,9 +20,10 @@ export const $forceCardinality = <TCardinality extends QueryCardinality>(
         outputShape: undefined,
         clauses: [],
         cardinalityBehaviour: {
-          one: "force-one" as const,
-          "none-or-one": "force-none-or-one" as const,
-          many: "force-many" as const,
+          one: "!one" as const,
+          "none-or-one": "!none-or-one" as const,
+          "one-or-more": "!one-or-more" as const,
+          many: "!many" as const,
         }[cardinality],
         dataBehaviour: "merge",
       };

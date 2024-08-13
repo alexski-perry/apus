@@ -11,6 +11,7 @@ export { firstSorted } from "@cypher/queries/firstSorted";
 export { map } from "@cypher/queries/map";
 export { mapAndCollect } from "@cypher/queries/mapAndCollect";
 export { mapFirst } from "@cypher/queries/mapFirst";
+export { matchRelation } from "@cypher/queries/matchRelation";
 export { match, optionalMatch, optionalMatchNode, matchNode } from "@cypher/queries/match";
 export { paginate } from "@cypher/queries/paginate";
 export { project } from "@cypher/queries/project";

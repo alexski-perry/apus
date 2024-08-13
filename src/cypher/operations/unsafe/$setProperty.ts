@@ -8,7 +8,7 @@ export const $setProperty = (
   entity: Node | Relationship,
   propertyName: string,
   value: Value,
-): QueryOperation<void, "same", "merge"> => {
+): QueryOperation<void, "->one", "merge"> => {
   return queryOperation({
     name: "$setProperty",
     resolver: resolveInfo => {
@@ -24,7 +24,7 @@ export const $setProperty = (
           }),
         ],
         outputShape: undefined,
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "->one",
         dataBehaviour: "merge",
       };
     },

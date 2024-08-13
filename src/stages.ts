@@ -1,6 +1,6 @@
 export { $match, $optionalMatch } from "@cypher/operations/$match";
 export { $matchNode, $optionalMatchNode } from "@cypher/operations/$matchNode";
-export { $map, $mapMany, $mapOptional } from "@cypher/operations/$map";
+export { $map, $mapMany, $mapNoneOrOne, $mapOneOrMore } from "@cypher/operations/$map";
 export { $where } from "@cypher/operations/$where";
 export { $orderBy } from "@cypher/operations/$orderBy";
 export { $limit } from "@cypher/operations/$limit";

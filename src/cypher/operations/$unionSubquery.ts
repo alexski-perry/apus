@@ -10,7 +10,13 @@ import { QueryOperation, queryOperation } from "@core/query-operation";
 export const $unionSubquery = <TRef extends DataMergeString, T extends Array<Query<any, any>>>(
   ref: TRef,
   queries: FlatNarrow<T>,
-): UnionOperation<T> => {
+): QueryOperation<
+  {
+    [I in keyof T]: GetQueryData<T[I]>;
+  }[number],
+  "!many", // todo more precise cardinality?
+  "merge"
+> => {
   return queryOperation({
     name: "$unionSubquery",
     resolver: resolveInfo => {
@@ -39,17 +45,9 @@ export const $unionSubquery = <TRef extends DataMergeString, T extends Array<Que
       return {
         clauses: [unionSubqueryClause(subqueries)],
         outputShape: applyDataMergeString(ref, outputVariable),
-        cardinalityBehaviour: "force-many",
+        cardinalityBehaviour: "!many",
         dataBehaviour: "merge",
       };
     },
   });
 };
-
-type UnionOperation<T extends Array<Query<any, any>>> = QueryOperation<
-  {
-    [I in keyof T]: GetQueryData<T[I]>;
-  }[number],
-  "force-many",
-  "merge"
->;

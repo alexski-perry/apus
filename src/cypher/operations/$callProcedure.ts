@@ -1,20 +1,29 @@
-import { ConstructorOf } from "@utils/ConstructorOf";
 import { Deconstruct } from "@utils/deconstruct";
 import { callProcedureClause, ProcedureResult } from "@core/clause";
 import { QueryCardinality } from "@core/query-cardinality";
 import { Value } from "@core/value";
 import { QueryOperation, queryOperation } from "@core/query-operation";
 import { DataShape } from "@core/data-shape";
+import { Type } from "@core/type/type";
 
-export const $callProcedure = <
-  TOutput extends Record<string, ConstructorOf<Value>> = {},
+export function $callProcedure<
+  TYields extends Record<string, Type> = {},
   TCardinality extends QueryCardinality = "one",
 >(
   name: string,
   args: Array<Value>,
-  yields?: TOutput,
+  yields?: TYields,
   cardinality?: TCardinality,
-): CallProcedureOperation<TOutput, TCardinality> => {
+): QueryOperation<
+  MakeQueryDataFromYields<TYields>,
+  {
+    one: "->one";
+    "none-or-one": "->none-or-one";
+    "one-or-more": "->one-or-more";
+    many: "->many";
+  }[TCardinality],
+  "merge"
+> {
   return queryOperation({
     name: "$callProcedure",
     resolver: resolveInfo => {
@@ -37,31 +46,25 @@ export const $callProcedure = <
         ],
         outputShape: Object.keys(output).length === 0 ? undefined : output,
         cardinalityBehaviour: {
-          one: "same" as const,
-          "none-or-one": "optional" as const,
-          many: "force-many" as const,
+          one: "->one" as const,
+          "none-or-one": "->none-or-one" as const,
+          "one-or-more": "->one-or-more" as const,
+          many: "->many" as const,
         }[cardinality ?? "one"],
         dataBehaviour: "merge",
       };
     },
   });
-};
+}
 
-type CallProcedureOperation<
-  TOutput extends Record<string, ConstructorOf<Value>>,
-  TCardinality extends QueryCardinality,
-> = QueryOperation<
-  keyof {
-    [K in keyof TOutput]: Deconstruct<TOutput[K]>;
-  } extends never
-    ? void
-    : {
-        [K in keyof TOutput]: Deconstruct<TOutput[K]>;
-      },
-  {
-    one: "same";
-    "none-or-one": "optional";
-    many: "force-many";
-  }[TCardinality],
-  "merge"
->;
+/*
+  INTERNAL
+ */
+
+type MakeQueryDataFromYields<TYields extends Record<string, Type>> = keyof {
+  [K in keyof TYields]: Deconstruct<TYields[K]>;
+} extends never
+  ? void
+  : {
+      [K in keyof TYields]: Deconstruct<TYields[K]>;
+    };

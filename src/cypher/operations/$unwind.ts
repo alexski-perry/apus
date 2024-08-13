@@ -8,10 +8,10 @@ import {
   DataMergeString,
 } from "@core/data-merge-string";
 
-export const $unwind = <TMergeString extends DataMergeString, TType extends Value>(
+export function $unwind<TMergeString extends DataMergeString, TType extends Value>(
   dataMergeString: TMergeString,
   list: List<TType>,
-): QueryOperation<ApplyDataMergeString<TMergeString, TType>, "force-many", "merge"> => {
+): QueryOperation<ApplyDataMergeString<TMergeString, TType>, "->many", "merge"> {
   return queryOperation({
     name: "$unwind",
     resolver: resolveInfo => {
@@ -24,9 +24,9 @@ export const $unwind = <TMergeString extends DataMergeString, TType extends Valu
           }),
         ],
         outputShape: applyDataMergeString(dataMergeString, variable),
-        cardinalityBehaviour: "force-many",
+        cardinalityBehaviour: "->many",
         dataBehaviour: "merge",
       };
     },
   });
-};
+}

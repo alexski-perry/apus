@@ -9,26 +9,36 @@ import { mapQueryData, QueryData, QueryDataMap } from "@core/query-data";
 import { QueryCardinality } from "@core/query-cardinality";
 import { typeOf } from "@core/type/type";
 
-export const $map = <TMapping extends Mapping<"1->1">>(
+export const $map = <TMapping extends Mapping<"->one">>(
   mapping: TMapping,
-): QueryOperation<ParseMapping<TMapping>, "same", "overwrite"> =>
-  createMapOperation(mapping, "1->1", "$map");
+): QueryOperation<ParseMapping<TMapping>, "->one", "overwrite"> => {
+  return createMapOperation(mapping, "->one", "$map");
+};
 
-export const $mapMany = <TMapping extends Mapping<"1->m">>(
+export const $mapNoneOrOne = <TMapping extends Mapping<"->none-or-one">>(
   mapping: TMapping,
-): QueryOperation<ParseMapping<TMapping>, "force-many", "overwrite"> =>
-  createMapOperation(mapping, "1->m", "$mapMany");
+): QueryOperation<ParseMapping<TMapping>, "->none-or-one", "overwrite"> => {
+  return createMapOperation(mapping, "->none-or-one", "$mapNoneOrOne");
+};
 
-export const $mapOptional = <TMapping extends Mapping<"1->?">>(
+export const $mapOneOrMore = <TMapping extends Mapping<"->one-or-more">>(
   mapping: TMapping,
-): QueryOperation<ParseMapping<TMapping>, "optional", "overwrite"> =>
-  createMapOperation(mapping, "1->?", "$mapOptional");
+): QueryOperation<ParseMapping<TMapping>, "->one-or-more", "overwrite"> => {
+  return createMapOperation(mapping, "->one-or-more", "$mapNoneOrOne");
+};
+
+export const $mapMany = <TMapping extends Mapping<"->many">>(
+  mapping: TMapping,
+): QueryOperation<ParseMapping<TMapping>, "->many", "overwrite"> => {
+  return createMapOperation(mapping, "->many", "$mapMany");
+};
 
 const createMapOperation = (
   mapping: Mapping<any>,
   mapType: MapType,
   name: string,
 ): QueryOperation<any, any, any> => {
+  // todo merge all this with with buildSubquery
   // special case: if mapping a query, just append the operations -- todo consider doing the same for named query data with just one query
   if (mapping instanceof Query) {
     const { input, stages } = Query.resolve(mapping);
@@ -53,11 +63,7 @@ const createMapOperation = (
         return {
           clauses: [withClause(inputVariables.map(variable => ({ output: variable })))],
           outputShape: inputShape,
-          cardinalityBehaviour: {
-            "1->1": "same" as const,
-            "1->?": "optional" as const,
-            "1->m": "force-many" as const,
-          }[mapType],
+          cardinalityBehaviour: mapType,
           dataBehaviour: "overwrite",
           additionalStages: stages,
         };
@@ -107,11 +113,7 @@ const createMapOperation = (
       return {
         clauses: [...subqueryClauses, withClause(withClauseMappings)],
         outputShape,
-        cardinalityBehaviour: {
-          "1->1": "same" as const,
-          "1->?": "optional" as const,
-          "1->m": "force-many" as const,
-        }[mapType],
+        cardinalityBehaviour: mapType,
         dataBehaviour: "overwrite",
       };
     },
@@ -122,7 +124,7 @@ const createMapOperation = (
   TYPES
  */
 
-type MapType = "1->1" | "1->m" | "1->?";
+type MapType = "->one" | "->none-or-one" | "->one-or-more" | "->many";
 
 export type Mapping<TMapType extends MapType = MapType> =
   | Value
@@ -146,9 +148,10 @@ export type QueryMapping<
   TMapType extends MapType,
 > = TMapType extends MapType
   ? {
-      "1->1": Query<TType, "one">;
-      "1->?": Query<TType, "one" | "none-or-one">;
-      "1->m": Query<TType, "one" | "none-or-one" | "many">;
+      "->one": Query<TType, "one">;
+      "->none-or-one": Query<TType, "one" | "none-or-one">;
+      "->one-or-more": Query<TType, "one" | "one-or-more">;
+      "->many": Query<TType, "one" | "one-or-more" | "none-or-one" | "many">;
     }[TMapType]
   : never;
 

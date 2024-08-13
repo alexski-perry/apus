@@ -21,7 +21,7 @@ export const $createNode = <
   ref: TRef = "@",
 ): QueryOperation<
   ApplyDataMergeString<TRef, Node<DefinitionFromClass<TDef>>>,
-  "same",
+  "->one",
   "merge"
 > => {
   return queryOperation({
@@ -52,7 +52,7 @@ export const $createNode = <
           ]),
           ...mutationClauses,
         ],
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "->one",
         dataBehaviour: "merge",
       };
     },

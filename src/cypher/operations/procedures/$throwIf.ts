@@ -10,7 +10,7 @@ import { parameterize } from "@core/parameterize";
 export const $throwIf = (
   predicate: Boolean,
   message?: string,
-): QueryOperation<void, "same", "merge"> =>
+): QueryOperation<void, "->one", "merge"> =>
   $callProcedure("apoc.util.validate", [
     predicate,
     parameterize(message ?? "Assertion failed", String),

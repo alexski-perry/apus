@@ -6,7 +6,7 @@ import { Relationship } from "@cypher/types/structural/relationship";
 
 export const $delete = (
   relationship: Node | Relationship | Optional<Node | Relationship>,
-): QueryOperation<void, "same", "merge"> => {
+): QueryOperation<void, "->one", "merge"> => {
   return queryOperation({
     name: "$delete",
     resolver: resolveInfo => {
@@ -17,7 +17,7 @@ export const $delete = (
       return {
         clauses: [deleteClause(valueData)],
         outputShape: undefined,
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "->one",
         dataBehaviour: "merge",
       };
     },

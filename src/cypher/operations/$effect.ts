@@ -5,7 +5,7 @@ import { Query } from "@core/query";
 import { queryOperation, QueryOperation } from "@core/query-operation";
 import { Value } from "@core/value";
 
-export const $effect = (query: Query<any, any>): QueryOperation<void, "same", "merge"> => {
+export const $effect = (query: Query<any, any>): QueryOperation<void, "->one", "merge"> => {
   return queryOperation({
     name: "$effect",
     resolver: resolveInfo => {
@@ -16,7 +16,7 @@ export const $effect = (query: Query<any, any>): QueryOperation<void, "same", "m
         return {
           clauses: [],
           outputShape: undefined,
-          cardinalityBehaviour: "same",
+          cardinalityBehaviour: "->one",
           dataBehaviour: "merge",
         };
       }
@@ -34,7 +34,7 @@ export const $effect = (query: Query<any, any>): QueryOperation<void, "same", "m
           ]),
         ],
         outputShape: undefined,
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "->one",
         dataBehaviour: "merge",
       };
     },

@@ -4,15 +4,13 @@ import { NodeUpdateData } from "@cypher/mutation/utils/NodeUpdateData";
 import { maybeLoadModel } from "@schema/utils";
 import { AbstractNodeDefinition, NodeDefinition } from "@schema/definition";
 import { handleMutation } from "@cypher/mutation/utils/handleMutation";
-import { Value } from "@core/value";
-import { isVariable } from "@core/value-info";
 
 export const $updateNode = <
   TNode extends Node<string | NodeDefinition | AbstractNodeDefinition>,
 >(
   node: TNode,
   data: NodeUpdateData<ExtractNodeDefinition<TNode>>,
-): QueryOperation<void, "same", "merge"> => {
+): QueryOperation<void, "->one", "merge"> => {
   return queryOperation({
     name: "$updateNode",
     resolver: resolveInfo => {
@@ -34,24 +32,9 @@ export const $updateNode = <
       return {
         outputShape: undefined,
         clauses: mutationClauses,
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "->one",
         dataBehaviour: "merge",
       };
     },
   });
-
-  // return queryOperationFromQuery(
-  //   "$updateNode",
-  //   query(() =>
-  //     $effect(
-  //       handleMutation({
-  //         entityModel,
-  //         entityValue: node,
-  //         data,
-  //         mutationType: "update",
-  //         providedData: {},
-  //       }),
-  //     ),
-  //   ),
-  // );
 };

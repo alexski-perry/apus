@@ -3,14 +3,14 @@ import { limitClause } from "@core/clause";
 import { Int } from "@cypher/types/scalar/int";
 import { parameterize } from "@core/parameterize";
 
-export const $limit = (val: Int | number): QueryOperation<void, "same", "merge"> => {
+export const $limit = (val: Int | number): QueryOperation<void, "<-many", "merge"> => {
   return queryOperation({
     name: "$limit",
     resolver: resolveInfo => {
       return {
         clauses: [limitClause(resolveInfo.resolveValue(parameterize(val, Int)))],
         outputShape: undefined,
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "<-many",
         dataBehaviour: "merge",
       };
     },

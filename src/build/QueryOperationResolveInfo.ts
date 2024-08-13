@@ -3,7 +3,7 @@ import { Type } from "@core/type/type";
 import { Query } from "@core/query";
 import { DataShape } from "@core/data-shape";
 import { Value } from "@core/value";
-import { isExpression, isParameter, isVariable, ValueInfo, Variable } from "@core/value-info";
+import { isVariable, ValueInfo, Variable } from "@core/value-info";
 import { MatchPatternData } from "@core/pattern/match-pattern";
 import {
   isPatternVariableDeclaration,

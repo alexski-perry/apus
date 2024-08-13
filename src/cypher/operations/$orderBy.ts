@@ -5,7 +5,7 @@ import { Value } from "@core/value";
 export type Order = "ASC" | "DESC";
 export type Orderings = Value | [Value, Order] | Array<Value | [Value, Order]>;
 
-export const $orderBy = (orderings: Orderings): QueryOperation<void, "same", "merge"> => {
+export function $orderBy(orderings: Orderings): QueryOperation<void, "->one", "merge"> {
   return queryOperation({
     name: "$orderBy",
     resolver: resolveInfo => {
@@ -37,9 +37,9 @@ export const $orderBy = (orderings: Orderings): QueryOperation<void, "same", "me
       return {
         outputShape: undefined,
         clauses: [orderByClause(normalizedOrderings)],
-        cardinalityBehaviour: "same",
+        cardinalityBehaviour: "->one",
         dataBehaviour: "merge",
       };
     },
   });
-};
+}

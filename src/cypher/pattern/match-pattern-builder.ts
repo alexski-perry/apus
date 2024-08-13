@@ -35,9 +35,9 @@ import {
 } from "@schema/definition";
 import {
   DefinitionFromClass,
-  getNodeLabelsForMatching,
   getConcreteRelationshipNames,
-} from "@schema/utils";
+  getNodeLabelsForMatching,
+} from "@schema/utils"; // todo implement named paths
 
 // todo implement named paths
 export const pattern = (): MatchPatternBuilder<void, {}, {}> =>
@@ -52,7 +52,7 @@ export class MatchPatternBuilder<
   TData extends QueryData,
   TNodeRefs extends Record<string, Node>,
   TRelRefs extends Record<string, Relationship>,
-> extends MatchPattern<TData, "many"> {
+> extends MatchPattern<TData> {
   constructor(
     private patternData: Omit<MatchPatternData, "cardinality"> & {
       nodeReferences: ReferenceMap;
@@ -62,7 +62,6 @@ export class MatchPatternBuilder<
     super({
       parts: patternData.parts,
       outputShape: patternData.outputShape,
-      cardinality: "many",
     });
   }
 

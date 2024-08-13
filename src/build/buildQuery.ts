@@ -3,7 +3,11 @@ import { isExpression, isParameter, isVariable, Variable } from "@core/value-inf
 import { Query, QueryStage } from "@core/query";
 import { Value } from "@core/value";
 import { mapQueryData, QueryData } from "@core/query-data";
-import { QueryOperation } from "@core/query-operation";
+import {
+  applyCardinalityBehaviour,
+  applyDataBehaviour,
+  QueryOperation,
+} from "@core/query-operation";
 import { VarBag } from "@build/var-bag";
 import { ParamRegistry } from "@build/param-registry";
 import { printClauses } from "@build/print";
@@ -13,7 +17,7 @@ import { expression } from "@core/expression";
 import { QueryCardinality } from "@core/query-cardinality";
 import { QueryOperationResolveInfo } from "@build/QueryOperationResolveInfo";
 import { $map } from "@cypher/operations/$map";
-import { DataShape, mapDataShape, mergeDataShape } from "@core/data-shape";
+import { DataShape, mapDataShape } from "@core/data-shape";
 
 export interface Environment {
   varBag: VarBag;
@@ -118,29 +122,17 @@ function applyStage(
 
   const { name, resolver } = QueryOperation.getData(operation);
 
-  // console.log("   ".repeat(level) + name);
-
   // standard resolver
 
   const { clauses, outputShape, cardinalityBehaviour, dataBehaviour, additionalStages } =
     resolver(new QueryOperationResolveInfo(prevEnvironment, valuesInScope));
 
-  const dataShape =
-    dataBehaviour === "overwrite"
-      ? outputShape
-      : mergeDataShape(prevEnvironment.dataShape, outputShape);
+  const dataShape = applyDataBehaviour(prevEnvironment.dataShape, outputShape, dataBehaviour);
 
-  const cardinality = {
-    same: prevEnvironment.cardinality,
-    optional: {
-      one: "none-or-one" as const,
-      "none-or-one": "none-or-one" as const,
-      many: "many" as const,
-    }[prevEnvironment.cardinality],
-    "force-one": "one" as const,
-    "force-none-or-one": "none-or-one" as const,
-    "force-many": "many" as const,
-  }[cardinalityBehaviour];
+  const cardinality = applyCardinalityBehaviour(
+    prevEnvironment.cardinality,
+    cardinalityBehaviour,
+  );
 
   let environment: Environment = {
     dataShape,

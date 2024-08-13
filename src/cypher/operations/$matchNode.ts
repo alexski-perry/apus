@@ -1,17 +1,20 @@
-import { $match, $optionalMatch } from "@cypher/operations/$match";
-import { pattern } from "@cypher/pattern/match-pattern-builder";
 import { Optional } from "@cypher/types/optional";
-import { ApplyDataMergeString, DataMergeString } from "@core/data-merge-string";
-import { QueryOperation } from "@core/query-operation";
+import {
+  applyDataMergeString,
+  ApplyDataMergeString,
+  DataMergeString,
+} from "@core/data-merge-string";
+import { queryOperation, QueryOperation } from "@core/query-operation";
 import {
   AbstractNodeDefinitionClass,
   NodeDefinitionClass,
   NodeUnionDefinitionClass,
 } from "@schema/definition";
-import { Node } from "@cypher/types/structural/node";
-import { DefinitionFromClass } from "@schema/utils";
+import { Node, NodeValue } from "@cypher/types/structural/node";
+import { DefinitionFromClass, getNodeLabelsForMatching } from "@schema/utils";
+import { matchClause } from "@core/clause";
 
-export const $matchNode = <
+export function $matchNode<
   TDef extends
     | string
     | NodeDefinitionClass
@@ -24,9 +27,11 @@ export const $matchNode = <
   ref: TRef = "@",
 ): QueryOperation<
   ApplyDataMergeString<TRef, Node<DefinitionFromClass<TDef>>>,
-  "force-many",
+  "->many",
   "merge"
-> => $match(pattern().newNode(node, ref));
+> {
+  return createMatchNodeStage(node, ref, false, "$matchNode");
+}
 
 export const $optionalMatchNode = <
   TDef extends
@@ -41,7 +46,54 @@ export const $optionalMatchNode = <
   ref: TRef = "@",
 ): QueryOperation<
   ApplyDataMergeString<TRef, Optional<Node<DefinitionFromClass<TDef>>>>,
-  "force-many",
+  "->one-or-more",
   "merge"
-  // @ts-expect-error
-> => $optionalMatch(pattern().newNode(node, ref));
+> => {
+  return createMatchNodeStage(node, ref, false, "$optionalMatchNode");
+};
+
+/*
+  INTERNAL
+ */
+
+function createMatchNodeStage(
+  definition:
+    | string
+    | NodeDefinitionClass
+    | AbstractNodeDefinitionClass
+    | NodeUnionDefinitionClass,
+  ref: DataMergeString,
+  isOptional: boolean,
+  name: string,
+): QueryOperation<any, any, any> {
+  return queryOperation({
+    name,
+    resolver: resolveInfo => {
+      const variable = resolveInfo.defineVariable(
+        isOptional
+          ? Optional.makeType(NodeValue.makeType(definition))
+          : NodeValue.makeType(definition),
+      );
+
+      return {
+        clauses: [
+          matchClause(
+            [
+              [
+                {
+                  entityType: "node",
+                  variable,
+                  nodeLabels: getNodeLabelsForMatching(definition),
+                },
+              ],
+            ],
+            { isOptional },
+          ),
+        ],
+        outputShape: applyDataMergeString(ref, variable),
+        cardinalityBehaviour: isOptional ? "->one-or-more" : "->many",
+        dataBehaviour: "merge",
+      };
+    },
+  });
+}
