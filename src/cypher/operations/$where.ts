@@ -10,7 +10,7 @@ import { Value } from "@core/value";
 export type Predicate = BooleanValue<any> | Query<BooleanValue<any>, "one">;
 export type Predicates = Predicate | Predicate[];
 
-export const $where = (predicates: Predicates): QueryOperation<void, "->one", "merge"> => {
+export const $where = (predicates: Predicates): QueryOperation<void, "<-many", "merge"> => {
   return queryOperation({
     name: "$where",
     resolver: resolveInfo => {
@@ -37,7 +37,7 @@ export const $where = (predicates: Predicates): QueryOperation<void, "->one", "m
       return {
         clauses: [...subqueryClauses, whereClause(resolvedPredicates)],
         outputShape: undefined,
-        cardinalityBehaviour: "->one",
+        cardinalityBehaviour: "<-many",
         dataBehaviour: "merge",
       };
     },
