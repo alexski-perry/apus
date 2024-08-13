@@ -14,6 +14,9 @@ import {
 } from "@cypher/pattern/relation-pattern";
 import { $collect } from "@cypher/operations/$collect";
 import { MakeOptional } from "@cypher/types/optional";
+import { forceOptional } from "@cypher";
+import { expressionFromQueryData } from "@core/expression";
+import { mapMaybe } from "@cypher/queries/mapMaybe";
 
 export function project<
   TPattern extends RelationPattern<any, any, any>,
@@ -27,11 +30,7 @@ export function project<
   if (relationModel.cardinality === "one") {
     return query_untyped(match(pattern), data => mapF(data));
   } else if (relationModel.cardinality === "optional") {
-    return query_untyped(
-      optionalMatch(pattern),
-      data => mapF(forceQueryDataNonOptional(data) as any),
-      data => forceQueryDataOptional(data) as any,
-    );
+    return query_untyped(optionalMatch(pattern), data => mapMaybe(data, mapF as any));
   } else {
     return query_untyped(
       match(pattern),
