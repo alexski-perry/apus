@@ -49,7 +49,7 @@ export const $optionalMatchNode = <
   "->one-or-more",
   "merge"
 > => {
-  return createMatchNodeStage(node, ref, false, "$optionalMatchNode");
+  return createMatchNodeStage(node, ref, true, "$optionalMatchNode");
 };
 
 /*
