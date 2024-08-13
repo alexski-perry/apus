@@ -1,6 +1,10 @@
 import { Mapping, ParseMapping } from "@cypher/operations/$map";
 import { GetMatchPatternData } from "@core/pattern/match-pattern";
-import { forceQueryDataNonOptional, ValueFromQueryData } from "@core/query-data";
+import {
+  forceQueryDataNonOptional,
+  forceQueryDataOptional,
+  ValueFromQueryData,
+} from "@core/query-data";
 import { Query, query_untyped } from "@core/query";
 import { match, optionalMatch } from "@cypher/queries/match";
 import { List } from "@cypher/types/list";
@@ -10,6 +14,7 @@ import {
 } from "@cypher/pattern/relation-pattern";
 import { $collect } from "@cypher/operations/$collect";
 import { forceNotOptional } from "@cypher";
+import { MakeOptional } from "@cypher/types/optional";
 
 export function project<
   TPattern extends RelationPattern<any, any, any>,
@@ -26,7 +31,7 @@ export function project<
     return query_untyped(
       optionalMatch(pattern),
       data => mapF(forceQueryDataNonOptional(data) as any),
-      data => forceNotOptional(data),
+      data => forceQueryDataOptional(data) as any,
     );
   } else {
     return query_untyped(
@@ -37,9 +42,15 @@ export function project<
   }
 }
 
+/*
+  INTERNAL
+ */
+
 type GetProjectData<
   TPattern extends RelationPattern<any, any, any>,
   TMapping extends Mapping<"->one">,
 > = GetRelationPatternCardinality<TPattern> extends "many"
   ? List<ValueFromQueryData<ParseMapping<TMapping>>>
-  : ParseMapping<TMapping>;
+  : GetRelationPatternCardinality<TPattern> extends "optional"
+    ? MakeOptional<ValueFromQueryData<ParseMapping<TMapping>>>
+    : ParseMapping<TMapping>;
