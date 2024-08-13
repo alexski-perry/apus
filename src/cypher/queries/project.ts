@@ -13,7 +13,6 @@ import {
   RelationPattern,
 } from "@cypher/pattern/relation-pattern";
 import { $collect } from "@cypher/operations/$collect";
-import { forceNotOptional } from "@cypher";
 import { MakeOptional } from "@cypher/types/optional";
 
 export function project<
