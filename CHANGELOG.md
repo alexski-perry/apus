@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.5.1
+
+### Patch Changes
+
+- 785ebe6: Fixed handling of nested map types
+
 ## 0.5.0
 
 ### Minor Changes
