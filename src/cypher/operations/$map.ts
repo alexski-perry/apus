@@ -8,6 +8,7 @@ import { Value } from "@core/value";
 import { mapQueryData, QueryData, QueryDataMap } from "@core/query-data";
 import { QueryCardinality } from "@core/query-cardinality";
 import { typeOf } from "@core/type/type";
+import { handleMapping } from "@cypher/operations/utils/handleMapping";
 
 export const $map = <TMapping extends Mapping<"->one">>(
   mapping: TMapping,
@@ -74,40 +75,9 @@ const createMapOperation = (
   return queryOperation({
     name,
     resolver: resolveInfo => {
-      const subqueryClauses: CallSubqueryClause[] = [];
-      const withClauseMappings: Array<ClauseMapping> = [];
-
-      const outputShape: DataShape = deepMap(
+      const { subqueryClauses, outputShape, withClauseMappings } = handleMapping(
         mapping,
-        el => el instanceof Value || el instanceof Query,
-        (mapping: Value | Query<any, any>) => {
-          if (mapping instanceof Value) {
-            const rawValue = resolveInfo.resolveValue(mapping);
-
-            if (rawValue.kind === "variable") {
-              const variable = rawValue;
-              withClauseMappings.push({ output: variable });
-              return variable;
-            } else if (rawValue.kind === "expression") {
-              const variable = resolveInfo.defineVariable(typeOf(mapping));
-              withClauseMappings.push({ output: variable, input: rawValue });
-              return variable;
-            } else {
-              return rawValue; // a parameter, so no need to add to WITH clause
-            }
-          }
-
-          if (mapping instanceof Query) {
-            const { outputShape, clauses } = resolveInfo.resolveSubquery(mapping);
-            withClauseMappings.push(
-              ...allVariablesFromDataShape(outputShape).map(variable => ({
-                output: variable,
-              })),
-            );
-            subqueryClauses.push({ type: "CALL SUBQUERY", clauses: clauses });
-            return outputShape;
-          }
-        },
+        resolveInfo,
       );
 
       return {

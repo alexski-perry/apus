@@ -1,12 +1,13 @@
 import { FlatNarrow } from "@utils/FlatNarrow";
 import { Clause, returnClause, unionSubqueryClause } from "@core/clause";
-import { expressionFromQueryData } from "@core/expression";
+import { makeExpressionFromQueryData } from "@core/expression";
 import { isValueInfo } from "@core/value-info";
 import { applyDataMergeString, DataMergeString } from "@core/data-merge-string";
 import { GetQueryData, Query, query_untyped } from "@core/query";
 import { Union } from "@cypher/types/union";
 import { QueryOperation, queryOperation } from "@core/query-operation";
 
+// todo allow UNION ALL
 export function $unionSubquery<TRef extends DataMergeString, T extends Array<Query<any, any>>>(
   ref: TRef,
   queries: FlatNarrow<T>,
@@ -24,7 +25,9 @@ export function $unionSubquery<TRef extends DataMergeString, T extends Array<Que
       const subqueries: Array<Array<Clause>> = [];
 
       queries.forEach(baseQuery => {
-        const augmentedQuery = query_untyped(baseQuery, row => expressionFromQueryData(row));
+        const augmentedQuery = query_untyped(baseQuery, row =>
+          makeExpressionFromQueryData(row),
+        );
         const { clauses, outputShape } = resolveInfo.resolveSubquery(augmentedQuery, {
           noReturn: true,
         });
@@ -43,7 +46,7 @@ export function $unionSubquery<TRef extends DataMergeString, T extends Array<Que
       });
 
       return {
-        clauses: [unionSubqueryClause(subqueries)],
+        clauses: [unionSubqueryClause(subqueries, "distinct")],
         outputShape: applyDataMergeString(ref, outputVariable),
         cardinalityBehaviour: "!many",
         dataBehaviour: "merge",

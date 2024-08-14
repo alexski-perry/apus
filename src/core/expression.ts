@@ -126,7 +126,7 @@ export const expressionMultiline = <T extends Value>(
   );
 };
 
-export const expressionFromQueryData = (queryData: QueryData, additionalLevel = 0): Value => {
+export function makeExpressionFromQueryData(queryData: QueryData, additionalLevel = 0): Value {
   if (!queryData) {
     return expression(Any)`null`;
   } else if (queryData instanceof Value) {
@@ -141,7 +141,7 @@ export const expressionFromQueryData = (queryData: QueryData, additionalLevel = 
       entries.forEach(([key, val], i) => {
         const isLast = i === entries.length - 1;
         lines.push(
-          line(additionalLevel + 1)`${key}: ${expressionFromQueryData(
+          line(additionalLevel + 1)`${key}: ${makeExpressionFromQueryData(
             val,
             additionalLevel + 1,
           )}${!isLast ? "," : ""}`,
@@ -163,7 +163,7 @@ export const expressionFromQueryData = (queryData: QueryData, additionalLevel = 
     }
   }
   throw new Error("unexpected query data shape");
-};
+}
 
 /*
   INTERNAL

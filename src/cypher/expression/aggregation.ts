@@ -1,7 +1,7 @@
 import { Value } from "@core/value";
 import { List } from "@cypher/types/list";
 import { Map } from "@cypher/types/map";
-import { expression, expressionFromQueryData } from "@core/expression";
+import { expression, makeExpressionFromQueryData } from "@core/expression";
 import { Type, typeOf } from "@core/type/type";
 import { mapQueryData } from "@core/query-data";
 
@@ -13,6 +13,6 @@ export function collectAgg<T extends Value | Record<string, Value>>(
       ? typeOf(value)
       : Map.makeType(mapQueryData(value, val => typeOf(val)));
 
-  const innerExpression = expressionFromQueryData(value);
+  const innerExpression = makeExpressionFromQueryData(value);
   return expression(List.makeType(innerType))`collect(${innerExpression})` as any;
 }

@@ -164,13 +164,16 @@ export const callSubqueryClause = (clauses: Array<Clause>): CallSubqueryClause =
 
 export interface UnionSubqueryClause extends BaseClause<"UNION SUBQUERY"> {
   subqueries: Array<Array<Clause>>;
+  unionType: "all" | "distinct";
 }
 
 export const unionSubqueryClause = (
   subqueries: Array<Array<Clause>>,
+  type: "all" | "distinct",
 ): UnionSubqueryClause => ({
   type: "UNION SUBQUERY",
   subqueries,
+  unionType: type,
 });
 
 export interface CallProcedureClause extends BaseClause<"CALL PROCEDURE"> {

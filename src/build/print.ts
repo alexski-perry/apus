@@ -201,7 +201,7 @@ export function printClauses(
             addLine(line, { noIndent: true });
           });
           if (!isLast) {
-            addLine("  UNION");
+            addLine("  UNION" + (clause.unionType === "all" ? " ALL" : ""));
           }
         });
         addLine(`}`);

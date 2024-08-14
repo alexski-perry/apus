@@ -6,7 +6,7 @@ import { MakeQueryDataOptional } from "@core/query-data";
 export function $match<TPattern extends MatchPattern>(
   pattern: TPattern,
 ): QueryOperation<GetMatchPatternData<TPattern>, "->many", "merge"> {
-  return createMatchStage(pattern, false, "$match");
+  return createMatchOperation(pattern, false, "$match");
 }
 
 export function $optionalMatch<TPattern extends MatchPattern>(
@@ -16,14 +16,14 @@ export function $optionalMatch<TPattern extends MatchPattern>(
   "->one-or-more",
   "merge"
 > {
-  return createMatchStage(pattern, true, "$optionalMatch");
+  return createMatchOperation(pattern, true, "$optionalMatch");
 }
 
 /*
   INTERNAL
  */
 
-function createMatchStage(
+function createMatchOperation(
   pattern: MatchPattern,
   isOptional: boolean,
   name: string,

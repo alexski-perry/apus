@@ -8,8 +8,8 @@ import { GetQueryCardinality, GetQueryData, Query } from "@core/query";
 import { QueryOperation, queryOperation } from "@core/query-operation";
 
 export function $subquery<TRef extends Identifier, TQuery extends Query>(
-  query: TQuery,
   ref: TRef,
+  query: TQuery,
 ): QueryOperation<
   // @ts-expect-error
   ApplyDataMergeString<TRef, GetQueryData<TQuery>>,

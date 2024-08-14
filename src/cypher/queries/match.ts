@@ -11,7 +11,7 @@ import { DefinitionFromClass } from "@schema/utils";
 import { Value } from "@core/value";
 import { MakeQueryDataOptional } from "@core/query-data";
 import { Float } from "@cypher/types/scalar/float";
-import { MakeOptional } from "@cypher/types/optional";
+import { MakeOptional, Optional } from "@cypher/types/optional";
 
 export function matchNode<
   TDef extends
@@ -29,7 +29,7 @@ export function optionalMatchNode<
     | NodeDefinitionClass
     | AbstractNodeDefinitionClass
     | NodeUnionDefinitionClass,
->(node: TDef): Query<Node<DefinitionFromClass<TDef>>, "many"> {
+>(node: TDef): Query<Optional<Node<DefinitionFromClass<TDef>>>, "many"> {
   return query_untyped(() => $optionalMatchNode(node));
 }
 
