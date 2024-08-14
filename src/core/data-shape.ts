@@ -1,21 +1,20 @@
 import { isValueInfo, Parameter, ValueInfo, Variable } from "@core/value-info";
 import { deepMap } from "@utils/deepMap";
 import { Any, Map, Null, nullConst, Pair, Triple } from "neo4j-querier";
-import { Type } from "@core/type/type";
+import { Type, typeOf } from "@core/type/type";
 import { Value } from "@core/value";
 import { DynamicExpressionLine, expression, expressionMultiline } from "@core/expression";
+import { QueryDataMap } from "@core/query-data";
 
 type VarOrParam = Variable | Parameter;
 
-export type DataShape =
-  | void
-  | VarOrParam
-  | {
-      [key: string]: DataShape;
-    }
-  | Array<VarOrParam>;
+export type DataShape = void | VarOrParam | ObjectDataShape | Array<VarOrParam>;
 
-function isObjectDataShape(shape: DataShape): shape is Record<string, DataShape> {
+type ObjectDataShape = {
+  [key: string]: ObjectDataShape | VarOrParam;
+};
+
+function isObjectDataShape(shape: DataShape): shape is ObjectDataShape {
   return !!shape && !isValueInfo(shape) && !Array.isArray(shape);
 }
 
@@ -70,8 +69,18 @@ export function makeExpressionFromDataShape(shape: DataShape, additionalLevel = 
   } else if (isValueInfo(shape)) {
     return shape;
   } else if (isObjectDataShape(shape)) {
-    const mapStructure: Record<string, Type> = mapDataShape(shape, val => val.type);
-    const expression = expressionMultiline(Map.makeType(mapStructure), line => {
+    const makeType = (input: ObjectDataShape | ValueInfo) => {
+      if (isValueInfo(input)) return input.type;
+      const type: Record<string, Type> = {};
+      Object.entries(input).forEach(([key, val]) => {
+        type[key] = makeType(val);
+      });
+      return Map.makeType(type);
+    };
+
+    const type = makeType(shape);
+
+    const expression = expressionMultiline(type, line => {
       const lines: Array<DynamicExpressionLine> = [];
       lines.push(line(additionalLevel)`{`);
       const entries = Object.entries(shape);

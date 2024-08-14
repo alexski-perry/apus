@@ -138,8 +138,6 @@ export function makeExpressionFromQueryData(queryData: QueryData, additionalLeve
   } else if (queryData instanceof Value) {
     return queryData;
   } else if (isQueryDataMap(queryData)) {
-    const entries = Object.entries(queryData);
-
     const makeType = (input: QueryDataMap | Value) => {
       if (input instanceof Value) return typeOf(input);
       const type: Record<string, Type> = {};
@@ -155,6 +153,7 @@ export function makeExpressionFromQueryData(queryData: QueryData, additionalLeve
       const lines: Array<DynamicExpressionLine> = [];
       lines.push(line(additionalLevel)`{`);
 
+      const entries = Object.entries(queryData);
       entries.forEach(([key, val], i) => {
         const isLast = i === entries.length - 1;
         lines.push(

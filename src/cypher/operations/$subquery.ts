@@ -6,6 +6,7 @@ import {
 import { callSubqueryClause } from "@core/clause";
 import { GetQueryCardinality, GetQueryData, Query } from "@core/query";
 import { QueryOperation, queryOperation } from "@core/query-operation";
+import { DataShape } from "@core/data-shape";
 
 export function $subquery<TRef extends Identifier, TQuery extends Query>(
   ref: TRef,
@@ -23,7 +24,7 @@ export function $subquery<TRef extends Identifier, TQuery extends Query>(
 
       return {
         clauses: [callSubqueryClause(clauses)],
-        outputShape: applyDataMergeString(ref, outputShape),
+        outputShape: applyDataMergeString(ref, outputShape) as DataShape,
         cardinalityBehaviour: `->${cardinality}`,
         dataBehaviour: "merge",
       };
