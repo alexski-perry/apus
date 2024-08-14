@@ -5,7 +5,13 @@ import { Triple } from "@cypher/types/triple";
 import { ExpressionPrintFn } from "@core/value-info";
 import { Type, typeOf } from "@core/type/type";
 import { Value } from "@core/value";
-import { isQueryDataMap, isTupleQueryData, mapQueryData, QueryData } from "@core/query-data";
+import {
+  isQueryDataMap,
+  isTupleQueryData,
+  mapQueryData,
+  QueryData,
+  QueryDataMap,
+} from "@core/query-data";
 import { Any } from "@cypher/types/any";
 
 export const expression = <T extends Value>(type: ConstructorOf<T>) => {
@@ -132,12 +138,23 @@ export function makeExpressionFromQueryData(queryData: QueryData, additionalLeve
   } else if (queryData instanceof Value) {
     return queryData;
   } else if (isQueryDataMap(queryData)) {
-    const type: Record<string, Type> = mapQueryData(queryData, val => typeOf(val));
+    const entries = Object.entries(queryData);
 
-    return expressionMultiline(Map.makeType(type), line => {
+    const makeType = (input: QueryDataMap | Value) => {
+      if (input instanceof Value) return typeOf(input);
+      const type: Record<string, Type> = {};
+      Object.entries(input).forEach(([key, val]) => {
+        type[key] = makeType(val);
+      });
+      return Map.makeType(type);
+    };
+
+    const type = makeType(queryData);
+
+    return expressionMultiline(type, line => {
       const lines: Array<DynamicExpressionLine> = [];
       lines.push(line(additionalLevel)`{`);
-      const entries = Object.entries(queryData);
+
       entries.forEach(([key, val], i) => {
         const isLast = i === entries.length - 1;
         lines.push(

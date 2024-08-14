@@ -2,7 +2,6 @@ import { Neo4jParamValue, Neo4jValue } from "@core/neo4j-value";
 import { ConstructorOf } from "@utils/ConstructorOf";
 import { Value } from "@core/value";
 import { getDebugName, getTypeInfo } from "@core/type/type-info";
-import * as util from "util";
 
 export type Type = ConstructorOf<Value>;
 export type TypeOf<T extends Value> = ConstructorOf<T>;
