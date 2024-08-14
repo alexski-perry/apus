@@ -7,3 +7,4 @@ export * from "@cypher/expression/function/string";
 export * from "@cypher/expression/function/date";
 export * from "@cypher/expression/function/uuid";
 export * from "@cypher/expression/maybe";
+export { data } from "@cypher/expression/data";
