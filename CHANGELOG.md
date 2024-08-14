@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.6.1
+
+### Patch Changes
+
+- 0636a9b: Export `data` function
+
 ## 0.6.0
 
 ### Minor Changes
