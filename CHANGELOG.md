@@ -1,5 +1,16 @@
 # @alexski-perry/apus
 
+## 0.5.0
+
+### Minor Changes
+
+- 6fca80d: Add `$mapMaybe` and update `mapMaybe` to use it
+
+### Patch Changes
+
+- 6fca80d: Fix optionalMatchNode type
+- 6fca80d: Fix typing of matchMaybe/$matchMaybe
+
 ## 0.4.0
 
 ### Minor Changes
