@@ -16,7 +16,6 @@ export class ParamRegistry {
   }
 
   public getParams() {
-    console.log(this.params);
     return this.params;
   }
 }
