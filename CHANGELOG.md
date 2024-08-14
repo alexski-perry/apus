@@ -1,5 +1,17 @@
 # @alexski-perry/apus
 
+## 0.6.0
+
+### Minor Changes
+
+- ef74265: Add `toID` function
+- ef74265: Add `data` function for paramaterizing complex data
+
+### Patch Changes
+
+- ef74265: Fix serialization of Any
+- ef74265: Add missing `$unwind` export
+
 ## 0.5.1
 
 ### Patch Changes
