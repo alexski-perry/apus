@@ -1,5 +1,15 @@
 # @alexski-perry/apus
 
+## 0.7.0
+
+### Minor Changes
+
+- a1e006f: Add `toInt` function
+
+### Patch Changes
+
+- a1e006f: Fix serialization and related types
+
 ## 0.6.1
 
 ### Patch Changes
