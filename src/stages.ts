@@ -17,7 +17,7 @@ export { $unionSubquery } from "@cypher/operations/$unionSubquery";
 export { $updateNode } from "@cypher/operations/$updateNode";
 export { $createNode } from "@cypher/operations/$createNode";
 export { $deleteNode } from "@cypher/operations/$deleteNode";
-
+export { $unwind } from "@cypher/operations/$unwind";
 export { $create } from "@cypher/operations/unsafe/$create";
 export { $delete } from "@cypher/operations/unsafe/$delete";
 export { $setProperty } from "@cypher/operations/unsafe/$setProperty";
