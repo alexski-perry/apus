@@ -34,23 +34,21 @@ export type Neo4jValue =
       [key: string]: Neo4jValue;
     };
 
-export type Neo4jParamValue =
+export type Neo4jSerializableValue =
   | boolean
   | string
   | number // float
   | Integer
-  | Date<number>
-  | LocalDateTime<number>
-  | LocalTime<number>
   | globalThis.Date
-  | Time<number>
-  | DateTime<number>
-  | Duration<number>
-  | Point<number>
+  | Date<any>
+  | LocalDateTime<any>
+  | LocalTime<any>
+  | Time<any>
+  | DateTime<any>
   | null
-  | Array<Neo4jParamValue>
+  | Array<Neo4jSerializableValue>
   | {
-      [key: string]: Neo4jParamValue;
+      [key: string]: Neo4jSerializableValue;
     };
 
 // used for Any type
@@ -100,7 +98,7 @@ export const parseNeo4jValue = (value: Neo4jValue): any => {
   }
 };
 
-export const serializeNeo4jValue = (value: any): Neo4jParamValue | undefined => {
+export const serializeNeo4jValue = (value: any): Neo4jSerializableValue | undefined => {
   if (
     value === null ||
     typeof value === "string" ||

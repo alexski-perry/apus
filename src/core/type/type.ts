@@ -1,4 +1,4 @@
-import { Neo4jParamValue, Neo4jValue } from "@core/neo4j-value";
+import { Neo4jSerializableValue, Neo4jValue } from "@core/neo4j-value";
 import { ConstructorOf } from "@utils/ConstructorOf";
 import { Value } from "@core/value";
 import { getDebugName, getTypeInfo } from "@core/type/type-info";
@@ -24,7 +24,7 @@ export const parseValue = (value: Neo4jValue, type: Type): any => {
 /**
  *  Serialize a value from a given `QueryDataConstructor`
  */
-export const serializeValue = (value: any, type: Type): Neo4jParamValue | undefined => {
+export const serializeValue = (value: any, type: Type): Neo4jSerializableValue | undefined => {
   const result = getTypeInfo(type).serialize(value);
   if (result === undefined) {
     console.error({ failedSerializationValue: value });

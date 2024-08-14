@@ -1,10 +1,10 @@
-import { Neo4jParamValue, Neo4jValue } from "@core/neo4j-value";
+import { Neo4jSerializableValue, Neo4jValue } from "@core/neo4j-value";
 import { Value } from "@core/value";
 import { Type, TypeOf } from "@core/type/type";
 
 type TypeInfo<TOutput> = {
   parseValue: (data: Neo4jValue) => TOutput | undefined; // undefined represents failed parsing
-  serialize: (value: any) => Neo4jParamValue | undefined; // undefined represents failed serialization
+  serialize: (value: any) => Neo4jSerializableValue | undefined; // undefined represents failed serialization
   debugName: string;
 };
 

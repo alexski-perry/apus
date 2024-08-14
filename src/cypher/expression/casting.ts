@@ -3,6 +3,8 @@ import { typeOf, TypeOf } from "@core/type/type";
 import { Optional } from "@cypher/types/optional";
 import { StringValue } from "@cypher/types/scalar/string";
 import { ID } from "@cypher/types/scalar/id";
+import { Float } from "@cypher/types/scalar/float";
+import { Int, IntValue } from "@cypher/types/scalar/int";
 
 /**
  *  Create a value with a new type but the original ValueData
@@ -40,4 +42,8 @@ export function forceNotOptional<T extends Value>(
 
 export function toID(value: StringValue): ID {
   return forceType(value, ID);
+}
+
+export function toInt(value: Float | IntValue<any>): Int {
+  return forceType(value, Int);
 }

@@ -1,4 +1,4 @@
-import { Neo4jParamValue } from "@core/neo4j-value";
+import { Neo4jSerializableValue } from "@core/neo4j-value";
 import {
   Boolean,
   String,
@@ -24,8 +24,8 @@ import {
 import { parameterize } from "@core/parameterize";
 import { Type } from "@core/type/type";
 
-export function data<T extends Neo4jParamValue>(data: T): ValueFromData<T> {
-  const typeFromData = (data: Neo4jParamValue): Type => {
+export function data<T extends Neo4jSerializableValue>(data: T): ValueFromData<T> {
+  const typeFromData = (data: Neo4jSerializableValue): Type => {
     if (typeof data === "boolean") return Boolean;
     if (typeof data === "string") return String;
     if (typeof data === "number") return Float;
@@ -57,18 +57,32 @@ export function data<T extends Neo4jParamValue>(data: T): ValueFromData<T> {
   INTERNAL
  */
 
-type ValueFromData<T extends Neo4jParamValue> = null extends T
+type ValueFromData<T extends Neo4jSerializableValue> = null extends T
   ? Optional<ValueFromDataHelper<T>>
   : ValueFromDataHelper<T>;
 
-type ValueFromDataHelper<T extends Neo4jParamValue> = T extends boolean
+type ValueFromDataHelper<T extends Neo4jSerializableValue> = T extends boolean
   ? Boolean
   : T extends string
     ? String
-    : T extends number
-      ? Float
-      : T extends Record<string, Neo4jParamValue>
-        ? Map<{ [K in keyof T]: ValueFromData<T[K]> }>
-        : T extends Array<infer T extends Neo4jParamValue>
-          ? List<ValueFromData<T>>
-          : never;
+    : T extends boolean
+      ? Boolean
+      : T extends number
+        ? Float
+        : T extends Integer
+          ? Int
+          : T extends Neo4jDateTime
+            ? DateTime
+            : T extends Neo4jDate
+              ? Date
+              : T extends Neo4jTime
+                ? Time
+                : T extends Neo4jLocalDateTime
+                  ? LocalDateTime
+                  : T extends Neo4jLocalTime
+                    ? LocalTime
+                    : T extends Record<string, Neo4jSerializableValue>
+                      ? Map<{ [K in keyof T]: ValueFromData<T[K]> }>
+                      : T extends Array<infer T extends Neo4jSerializableValue>
+                        ? List<ValueFromData<T>>
+                        : never;
