@@ -42,6 +42,7 @@ export type Neo4jParamValue =
   | Date<number>
   | LocalDateTime<number>
   | LocalTime<number>
+  | globalThis.Date
   | Time<number>
   | DateTime<number>
   | Duration<number>
@@ -54,6 +55,7 @@ export type Neo4jParamValue =
 
 // used for Any type
 export const parseNeo4jValue = (value: Neo4jValue): any => {
+  // todo probably ought to convert dates
   if (
     value === null ||
     typeof value === "boolean" ||
@@ -103,7 +105,12 @@ export const serializeNeo4jValue = (value: any): Neo4jParamValue | undefined => 
     value === null ||
     typeof value === "string" ||
     typeof value === "number" || // numbers get serialized as floats
-    typeof value === "boolean"
+    typeof value === "boolean" ||
+    value instanceof Date ||
+    value instanceof DateTime ||
+    value instanceof LocalTime ||
+    value instanceof LocalDateTime ||
+    value instanceof Time
   ) {
     return value;
   }

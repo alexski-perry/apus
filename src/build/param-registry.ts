@@ -9,15 +9,14 @@ export class ParamRegistry {
   public registerAndPrint(param: Parameter): string {
     const cached = this.paramValueCache.get(param.value);
     if (cached) return "$" + cached;
-
     const newParam = `param${this.paramCount++}`;
-
     this.params[newParam] = serializeValue(param.value, param.type);
     this.paramValueCache.set(param.value, newParam);
     return "$" + newParam;
   }
 
   public getParams() {
+    console.log(this.params);
     return this.params;
   }
 }
