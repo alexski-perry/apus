@@ -661,9 +661,9 @@ const makeProperty = (
         ? { kind: "autogen", autogenValue: config.default, canOverride: true }
         : { kind: "input" },
     updateStrategy: config?.onUpdateGenerate
-      ? { kind: "autogen", autogenValue: config.generate, canOverride: false }
+      ? { kind: "autogen", autogenValue: config.onUpdateGenerate, canOverride: false }
       : config?.updateDefault
-        ? { kind: "autogen", autogenValue: config.default, canOverride: true }
+        ? { kind: "autogen", autogenValue: config.updateDefault, canOverride: true }
         : config?.readonly
           ? { kind: "not-allowed" }
           : { kind: "input" },
