@@ -2,7 +2,7 @@ import { expression } from "@core/expression";
 import { ValueOrInputType } from "@core/value";
 import { StringValue, String } from "@cypher/types/scalar/string";
 import { Boolean } from "@cypher/types/scalar/boolean";
-import { parameterize } from "@core/parameterize";
+import { makeParam } from "@core/makeParam";
 
 export const toUpper = (value: StringValue): String => expression(String)`toUpper(${value})`;
 
@@ -13,7 +13,7 @@ export const matchesRegex = (
   value: StringValue,
   regex: ValueOrInputType<StringValue> | RegExp,
 ): Boolean => {
-  const regexValue = parameterize(
+  const regexValue = makeParam(
     regex instanceof RegExp ? regex.toString() : regex,
     StringValue,
   );

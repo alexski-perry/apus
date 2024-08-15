@@ -2,7 +2,7 @@ import { castArray } from "@utils/castArray";
 import { AbstractNodeModel, NodeModel, RelationshipModel } from "@schema/model";
 import { Value } from "@core/value";
 import { RelationOperation } from "@cypher/mutation/operations/RelationOperation";
-import { parameterize } from "@core/parameterize";
+import { makeParam } from "@core/makeParam";
 import { Clause, setPropertyClause } from "@core/clause";
 import { QueryOperationResolveInfo } from "@build/QueryOperationResolveInfo";
 import { Variable } from "@core/value-info";
@@ -25,7 +25,7 @@ export const handleMutation = (args: {
     const providedData = data[propertyModel.key];
 
     const providedValue: Value | undefined =
-      providedData !== undefined ? parameterize(providedData, propertyModel.type) : undefined;
+      providedData !== undefined ? makeParam(providedData, propertyModel.type) : undefined;
 
     let value: Value | undefined;
 
@@ -39,7 +39,7 @@ export const handleMutation = (args: {
           : undefined;
 
     if (autogenInfo) {
-      const autoGenValue = parameterize(autogenInfo.autogenValue, propertyModel.type);
+      const autoGenValue = makeParam(autogenInfo.autogenValue, propertyModel.type);
 
       value = autogenInfo.canOverride
         ? providedValue !== undefined

@@ -5,7 +5,7 @@ import { Any } from "@cypher/types/any";
 import { String } from "@cypher/types/scalar/string";
 import { Boolean } from "@cypher/types/scalar/boolean";
 
-import { parameterize } from "@core/parameterize";
+import { makeParam } from "@core/makeParam";
 
 export const $throwIf = (
   predicate: Boolean,
@@ -13,6 +13,6 @@ export const $throwIf = (
 ): QueryOperation<void, "->one", "merge"> =>
   $callProcedure("apoc.util.validate", [
     predicate,
-    parameterize(message ?? "Assertion failed", String),
+    makeParam(message ?? "Assertion failed", String),
     expression(Any)`[]`,
   ]);

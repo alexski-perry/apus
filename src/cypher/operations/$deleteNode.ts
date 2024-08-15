@@ -18,7 +18,7 @@ import {
   getModelDebugName,
   getRelationshipName,
 } from "@schema/utils";
-import { parameterize } from "@core/parameterize";
+import { makeParam } from "@core/makeParam";
 import { queryOperation, QueryOperation } from "@core/query-operation";
 import {
   callProcedureClause,
@@ -172,7 +172,7 @@ function getSubtypeQuery(params: {
           args: [
             Value.getValueInfo(isNotNull(Value.createRaw(relationshipVariable))),
             Value.getValueInfo(
-              parameterize(
+              makeParam(
                 `Can't delete '${getModelDebugName(
                   subtypeModel,
                 )}' with ID '%s' because one or more '${relationModel.key}' relations exist`,

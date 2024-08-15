@@ -6,6 +6,7 @@ import { Id } from "@utils/Id";
 import { stringifyObject } from "@utils/stringifyObject";
 import { GetQueryDataOutputType } from "@core/query-data";
 import { getDebugName, setTypeInfo } from "@core/type/type-info";
+import { Deconstruct } from "@utils/deconstruct";
 
 export class Map<
   TStructure extends Record<string, Value> = Record<string, Value>,
@@ -14,16 +15,16 @@ export class Map<
     super();
   }
 
-  static makeType<T extends Record<string, Value>>(
-    structure: Record<string, Type>,
-  ): TypeOf<Map<T>> {
-    const type = class extends Map<T> {
+  static makeType<T extends Record<string, Type>>(
+    structure: T,
+  ): TypeOf<Map<GetMapStructure<T>>> {
+    const type = class extends Map<GetMapStructure<T>> {
       constructor() {
         super(structure);
       }
     };
 
-    setTypeInfo<MapInputType<T>, MapOutputType<T>>(type, {
+    setTypeInfo<MapInputType<GetMapStructure<T>>, MapOutputType<GetMapStructure<T>>>(type, {
       parseValue: (val: Neo4jValue) => {
         if (!isPureObject(val)) return undefined;
         const valObject: Record<string, any> = val as any;
@@ -37,7 +38,7 @@ export class Map<
           parsed[key] = parsedItem;
         });
 
-        return parsed as MapOutputType<T>;
+        return parsed as MapOutputType<GetMapStructure<T>>;
       },
       serialize: val => {
         if (!isPureObject(val)) return undefined;
@@ -78,3 +79,5 @@ type MapInputType<T extends Record<string, Value>> = Id<{
 type MapOutputType<T extends Record<string, Value>> = Id<{
   [K in keyof T]: GetQueryDataOutputType<T[K]>;
 }>;
+
+type GetMapStructure<T extends Record<string, Type>> = { [K in keyof T]: Deconstruct<T[K]> };

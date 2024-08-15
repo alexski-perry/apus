@@ -1,7 +1,7 @@
 import { setTypeInfo } from "@core/type/type-info";
 import { ScalarValue } from "@cypher/types/scalar";
 
-export class JSON extends ScalarValue<"JSON", object, object> {}
+export class JSON extends ScalarValue<"JSON", object | object[], object | object[]> {}
 
 setTypeInfo(JSON, {
   parseValue: value => {

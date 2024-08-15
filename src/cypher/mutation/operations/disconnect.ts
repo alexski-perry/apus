@@ -25,8 +25,8 @@ import { isVariable, Variable } from "@core/value-info";
 import { getRelationshipName } from "@schema/utils";
 import { Value } from "@core/value";
 import { RelationshipValue } from "@cypher/types/structural/relationship";
-import { parameterize } from "@core/parameterize";
-import {an} from "vitest/dist/chunks/reporters.C_zwCd4j";
+import { makeParam } from "@core/makeParam";
+import { an } from "vitest/dist/chunks/reporters.C_zwCd4j";
 
 export const disconnect = <TReplaceWith extends RelationInput>(
   node: TReplaceWith,
@@ -102,7 +102,7 @@ export class DisconnectOperation<
                 isNotNull(Value.create(relationshipVariable.type, relationshipVariable)),
               ),
               Value.getValueInfo(
-                parameterize("Attempted to disconnect a relationship that wasn't connected"),
+                makeParam("Attempted to disconnect a relationship that wasn't connected"),
               ),
             ],
             yields: [],

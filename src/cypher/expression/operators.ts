@@ -8,7 +8,7 @@ import { String, StringValue } from "@cypher/types/scalar/string";
 import { NodeValue } from "@cypher/types/structural/node";
 import { Optional } from "@cypher/types/optional";
 import { List } from "@cypher/types/list";
-import { parameterize } from "@core/parameterize";
+import { makeParam } from "@core/makeParam";
 
 /*
   MATHS OPERATIONS
@@ -98,7 +98,7 @@ export const negate = <T1 extends IntValue<any> | FloatValue<any>>(
  */
 
 export const equals = <T extends Value>(a: T, b: ValueOrInputType<T>): Boolean => {
-  const bParametrized = parameterize(b);
+  const bParametrized = makeParam(b);
   return expression(Boolean)`${a} = ${bParametrized}`;
 };
 
@@ -107,7 +107,7 @@ export const equals_weak = (a: Value, b: Value): Boolean => {
 };
 
 export const notEquals = <T extends Value>(a: T, b: ValueOrInputType<T>): Boolean => {
-  const bParametrized = parameterize(b);
+  const bParametrized = makeParam(b);
   return expression(Boolean)`${a} <> ${bParametrized}`;
 };
 
@@ -119,7 +119,7 @@ export const greaterThan = (
   val: IntValue<any> | FloatValue<any>,
   check: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const checkParametrized = parameterize(check);
+  const checkParametrized = makeParam(check);
   return expression(Boolean)`(${val} > ${checkParametrized})`;
 };
 
@@ -127,7 +127,7 @@ export const lessThan = (
   val: IntValue<any> | FloatValue<any>,
   check: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const checkParametrized = parameterize(check);
+  const checkParametrized = makeParam(check);
   return expression(Boolean)`(${val} < ${checkParametrized})`;
 };
 
@@ -135,7 +135,7 @@ export const greaterThanEq = (
   val: IntValue<any> | FloatValue<any>,
   check: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const checkParametrized = parameterize(check);
+  const checkParametrized = makeParam(check);
   return expression(Boolean)`(${val} >= ${checkParametrized})`;
 };
 
@@ -143,7 +143,7 @@ export const lessThanEq = (
   val: IntValue<any> | FloatValue<any>,
   check: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const checkParametrized = parameterize(check);
+  const checkParametrized = makeParam(check);
   return expression(Boolean)`(${val} <= ${checkParametrized})`;
 };
 
@@ -152,8 +152,8 @@ export const between = (
   lower: ValueOrInputType<IntValue<any> | FloatValue<any>>,
   upper: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const lowerParametrized = parameterize(lower);
-  const upperParametrized = parameterize(upper);
+  const lowerParametrized = makeParam(lower);
+  const upperParametrized = makeParam(upper);
   return expression(Boolean)`(${lowerParametrized} < ${val} < ${upperParametrized})`;
 };
 
@@ -162,8 +162,8 @@ export const betweenEq = (
   lower: ValueOrInputType<IntValue<any> | FloatValue<any>>,
   upper: ValueOrInputType<IntValue<any> | FloatValue<any>>,
 ): Boolean => {
-  const lowerParametrized = parameterize(lower);
-  const upperParametrized = parameterize(upper);
+  const lowerParametrized = makeParam(lower);
+  const upperParametrized = makeParam(upper);
   return expression(Boolean)`(${lowerParametrized} <= ${val} <= ${upperParametrized})`;
 };
 
@@ -177,8 +177,8 @@ export const inList = <T extends Value>(
   value: ValueOrInputType<T | Optional<T>>,
   list: ValueOrInputType<List<T>>,
 ) => {
-  const valueExpr = parameterize(value);
-  const listExpr = parameterize(list);
+  const valueExpr = makeParam(value);
+  const listExpr = makeParam(list);
   return expression(Boolean)`${valueExpr} IN ${listExpr}`;
 };
 
@@ -190,7 +190,7 @@ export const startsWith = (
   value: StringValue,
   targetPrefix: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const targetPrefixParametrized = parameterize(targetPrefix, String);
+  const targetPrefixParametrized = makeParam(targetPrefix, String);
   return expression(Boolean)`${value} STARTS WITH ${targetPrefixParametrized}`;
 };
 
@@ -198,7 +198,7 @@ export const endsWith = (
   value: StringValue,
   targetSuffix: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const targetSuffixParametrized = parameterize(targetSuffix, String);
+  const targetSuffixParametrized = makeParam(targetSuffix, String);
   return expression(Boolean)`${value} ENDS WITH ${targetSuffixParametrized}`;
 };
 
@@ -206,7 +206,7 @@ export const contains = (
   value: StringValue,
   target: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const targetParametrized = parameterize(target, String);
+  const targetParametrized = makeParam(target, String);
   return expression(Boolean)`${value} CONTAINS ${targetParametrized}`;
 };
 
@@ -214,7 +214,7 @@ export const startsWithCI = (
   value: StringValue,
   targetPrefix: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const targetPrefixParametrized = parameterize(targetPrefix, String);
+  const targetPrefixParametrized = makeParam(targetPrefix, String);
   return expression(
     Boolean,
   )`toLower(${value}) STARTS WITH toLower(${targetPrefixParametrized})`;
@@ -224,7 +224,7 @@ export const endsWithCI = (
   value: StringValue,
   targetSuffix: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const targetSuffixParametrized = parameterize(targetSuffix, String);
+  const targetSuffixParametrized = makeParam(targetSuffix, String);
   return expression(Boolean)`toLower(${value}) ENDS WITH toLower(${targetSuffixParametrized})`;
 };
 
@@ -232,7 +232,7 @@ export const containsCI = (
   value: StringValue,
   target: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const targetParametrized = parameterize(target, String);
+  const targetParametrized = makeParam(target, String);
   return expression(Boolean)`toLower(${value}) CONTAINS toLower(${targetParametrized})`;
 };
 
@@ -240,7 +240,7 @@ export const string_greaterThan = (
   val: StringValue,
   check: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const checkParametrized = parameterize(check, StringValue);
+  const checkParametrized = makeParam(check, StringValue);
   return expression(Boolean)`(${val} > ${checkParametrized})`;
 };
 
@@ -248,7 +248,7 @@ export const string_lessThan = (
   val: StringValue,
   check: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const checkParametrized = parameterize(check, StringValue);
+  const checkParametrized = makeParam(check, StringValue);
   return expression(Boolean)`(${val} < ${checkParametrized})`;
 };
 
@@ -256,7 +256,7 @@ export const string_greaterThanEq = (
   val: StringValue,
   check: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const checkParametrized = parameterize(check, StringValue);
+  const checkParametrized = makeParam(check, StringValue);
   return expression(Boolean)`(${val} >= ${checkParametrized})`;
 };
 
@@ -264,7 +264,7 @@ export const string_lessThanEq = (
   val: StringValue,
   check: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const checkParametrized = parameterize(check, StringValue);
+  const checkParametrized = makeParam(check, StringValue);
   return expression(Boolean)`(${val} <= ${checkParametrized})`;
 };
 
@@ -273,8 +273,8 @@ export const string_between = (
   lower: ValueOrInputType<StringValue>,
   upper: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const lowerParametrized = parameterize(lower, StringValue);
-  const upperParametrized = parameterize(upper, StringValue);
+  const lowerParametrized = makeParam(lower, StringValue);
+  const upperParametrized = makeParam(upper, StringValue);
   return expression(Boolean)`(${lowerParametrized} < ${val} < ${upperParametrized})`;
 };
 
@@ -283,8 +283,8 @@ export const string_betweenEq = (
   lower: ValueOrInputType<StringValue>,
   upper: ValueOrInputType<StringValue>,
 ): Boolean => {
-  const lowerParametrized = parameterize(lower, StringValue);
-  const upperParametrized = parameterize(upper, StringValue);
+  const lowerParametrized = makeParam(lower, StringValue);
+  const upperParametrized = makeParam(upper, StringValue);
   return expression(Boolean)`(${lowerParametrized} <= ${val} <= ${upperParametrized})`;
 };
 
@@ -318,7 +318,7 @@ export const concat = (
   a: ValueOrInputType<StringValue>,
   b: ValueOrInputType<StringValue>,
 ): String => {
-  const aParametrized = parameterize(a, String);
-  const bParametrized = parameterize(b, String);
+  const aParametrized = makeParam(a, String);
+  const bParametrized = makeParam(b, String);
   return expression(String)`${aParametrized} + ${bParametrized}`;
 };
