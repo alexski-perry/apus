@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.8.1
+
+### Patch Changes
+
+- ce12727: Fix typo causing issues with onUpdateGenerate properties
+
 ## 0.8.0
 
 ### Minor Changes
