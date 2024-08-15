@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.8.0
+
+### Minor Changes
+
+- ce0a288: Replace `data` with the better-typed `parameterize`. Rename previous function of same name to `makeParam`
+
 ## 0.7.0
 
 ### Minor Changes
