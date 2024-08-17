@@ -4,6 +4,7 @@ import {
   callSubqueryClause,
   Clause,
   deleteClause,
+  importWithClause,
   matchClause,
   resetCardinalityReturnClause,
 } from "@core/clause";
@@ -23,6 +24,7 @@ export class DisconnectAllOperation extends RelationOperation {
       );
 
       mutationClauses.push(
+        importWithClause([targetVariable]),
         matchClause(
           [
             [
