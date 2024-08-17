@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.8.2
+
+### Patch Changes
+
+- c6f29c2: Fix variable imporitng for `RelateTo` and `Disconnect` operations
+
 ## 0.8.1
 
 ### Patch Changes
