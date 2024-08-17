@@ -65,10 +65,20 @@ export class RelateToOperation<
         if (!isVariable(outputShape)) {
           throw new Error("relateTo: provided query had unexpected type");
         }
+
+        const additionalImportVariables: Variable[] = [];
+        if (clauses[0]?.type === "IMPORT WITH") {
+          additionalImportVariables.push(...clauses[0].variables);
+          clauses.shift();
+        }
+
         relateToVariable = outputShape;
         mutationClauses.push(
-          importWithClause([targetVariable]),
-          callSubqueryClause([importWithClause([targetVariable]), ...clauses]),
+          importWithClause([targetVariable, ...additionalImportVariables]),
+          callSubqueryClause([
+            importWithClause([targetVariable, ...additionalImportVariables]),
+            ...clauses,
+          ]),
         );
       } else {
         relateToVariable = resolveInfo.resolveVariable(relateTo);
@@ -78,8 +88,6 @@ export class RelateToOperation<
       const relationshipVariable = resolveInfo.defineVariable(
         RelationshipValue.makeType(getDefinitionClass(relationModel.relationship)),
       );
-
-
 
       mutationClauses.push(
         whereClause([

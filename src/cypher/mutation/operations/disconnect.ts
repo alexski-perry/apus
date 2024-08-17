@@ -53,10 +53,20 @@ export class DisconnectOperation<
         if (!isVariable(outputShape)) {
           throw new Error("disconnect: provided query had unexpected type");
         }
+
+        const additionalImportVariables: Variable[] = [];
+        if (clauses[0]?.type === "IMPORT WITH") {
+          additionalImportVariables.push(...clauses[0].variables);
+          clauses.shift();
+        }
+
         nodeToDisconnectVariable = outputShape;
         mutationClauses.push(
-          importWithClause([targetVariable]),
-          callSubqueryClause([importWithClause([targetVariable]), ...clauses]),
+          importWithClause([targetVariable, ...additionalImportVariables]),
+          callSubqueryClause([
+            importWithClause([targetVariable, ...additionalImportVariables]),
+            ...clauses,
+          ]),
         );
       } else {
         nodeToDisconnectVariable = resolveInfo.resolveVariable(disconnect);
