@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.8.3
+
+### Patch Changes
+
+- bdb84fb: Fix `DisconnectAll` not importing variable (catastrophic)
+
 ## 0.8.2
 
 ### Patch Changes
