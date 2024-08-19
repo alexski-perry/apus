@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.9.1
+
+### Patch Changes
+
+- b5dc056: Make `$deleteNode` set query data to empty
+
 ## 0.9.0
 
 ### Minor Changes
