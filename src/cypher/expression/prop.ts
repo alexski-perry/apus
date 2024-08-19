@@ -19,12 +19,9 @@ import { Id } from "@utils/Id";
 import { forceNotOptional, forceOptional } from "@cypher/expression/casting";
 import { BlogPost } from "../../../example/schemas/blog";
 
-const x = prop(null as any as Optional<Node<BlogPost>>, "id");
-
 /**
  *  Property access for a strongly typed node, relationship or map
  */
-// todo support optionals???
 export function prop<T extends ValueWithProps, K extends AllowedProperties<T>>(
   value: T,
   key: K,
