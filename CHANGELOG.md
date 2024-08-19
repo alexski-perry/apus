@@ -1,5 +1,16 @@
 # @alexski-perry/apus
 
+## 0.9.0
+
+### Minor Changes
+
+- 57fea8b: Allow `prop` to work with optional types
+
+### Patch Changes
+
+- 57fea8b: Export `optionalMatchRelation`
+- 57fea8b: Fix double `RETURN` in `$effect`
+
 ## 0.8.3
 
 ### Patch Changes
