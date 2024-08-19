@@ -36,7 +36,7 @@ import { Value } from "@core/value";
 import { QueryOperationResolveInfo } from "@build/QueryOperationResolveInfo";
 import { RelationshipValue } from "@cypher/types/structural/relationship";
 
-export const $deleteNode = (node: Node): QueryOperation<undefined, "->one", "merge"> => {
+export const $deleteNode = (node: Node): QueryOperation<undefined, "->one", "overwrite"> => {
   const definition = NodeValue.getDefinition(node);
 
   if (typeof definition === "string") throw new Error("untyped $deleteNode not yet supported");
@@ -55,7 +55,7 @@ export const $deleteNode = (node: Node): QueryOperation<undefined, "->one", "mer
         clauses: deleteClauses,
         outputShape: undefined,
         cardinalityBehaviour: "->one",
-        dataBehaviour: "merge",
+        dataBehaviour: "overwrite",
       };
     },
   });
