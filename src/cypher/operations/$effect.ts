@@ -9,7 +9,7 @@ export const $effect = (query: Query<any, any>): QueryOperation<void, "->one", "
   return queryOperation({
     name: "$effect",
     resolver: resolveInfo => {
-      const { clauses } = resolveInfo.resolveSubquery(query);
+      const { clauses } = resolveInfo.resolveSubquery(query, { noReturn: true });
 
       // ignore 'empty' effects
       if (clauses.length === 0) {
