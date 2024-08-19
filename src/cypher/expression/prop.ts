@@ -14,20 +14,26 @@ import { TypeOf } from "@core/type/type";
 import { Any } from "@cypher/types/any";
 import { Value } from "@core/value";
 import { getModelDebugName } from "@schema/utils";
-import { Optional } from "@cypher/types/optional";
+import { MakeOptional, Optional } from "@cypher/types/optional";
 import { Id } from "@utils/Id";
+import { forceNotOptional, forceOptional } from "@cypher/expression/casting";
+import { BlogPost } from "../../../example/schemas/blog";
+
+const x = prop(null as any as Optional<Node<BlogPost>>, "id");
 
 /**
  *  Property access for a strongly typed node, relationship or map
  */
 // todo support optionals???
-export function prop<
-  T extends
-    | Node<NodeDefinition | AbstractNodeDefinition>
-    | Relationship<RelationshipDefinition | AbstractRelationshipDefinition>
-    | Map,
-  K extends AllowedProperties<T>,
->(value: T, key: K): PropertyType<T, K> {
+export function prop<T extends ValueWithProps, K extends AllowedProperties<T>>(
+  value: T,
+  key: K,
+): PropertyType<T, K> {
+  if (value instanceof Optional) {
+    // @ts-expect-error
+    return forceOptional(prop(forceNotOptional(value)));
+  }
+
   if (value instanceof NodeValue) {
     const nodeDefinition = NodeValue.getDefinition(value);
     if (typeof nodeDefinition === "string") {
@@ -117,6 +123,13 @@ export function pick<
 
 // INTERNAL HELPERS
 
+type ValueWithProps = ValueWithPropsInner | Optional<ValueWithPropsInner>;
+
+type ValueWithPropsInner =
+  | Node<NodeDefinition | AbstractNodeDefinition>
+  | Relationship<RelationshipDefinition | AbstractRelationshipDefinition>
+  | Map;
+
 type PickProperties<
   T extends
     | Node<NodeDefinition | AbstractNodeDefinition>
@@ -127,7 +140,17 @@ type PickProperties<
   [K in TKeys[number]]: PropertyType<T, K>;
 };
 
-type AllowedProperties<T extends Node | Relationship | Map> = T extends Node<infer TNodeDef>
+type AllowedProperties<T extends ValueWithProps> = T extends Optional<infer TInner>
+  ? TInner extends ValueWithPropsInner
+    ? AllowedPropertiesInner<TInner>
+    : never
+  : T extends ValueWithPropsInner
+    ? AllowedPropertiesInner<T>
+    : never;
+
+type AllowedPropertiesInner<T extends Exclude<ValueWithProps, Optional<any>>> = T extends Node<
+  infer TNodeDef
+>
   ? TNodeDef extends NodeDefinition | AbstractNodeDefinition
     ? keyof TypedNodeProperties<TNodeDef>
     : never
@@ -139,7 +162,17 @@ type AllowedProperties<T extends Node | Relationship | Map> = T extends Node<inf
       ? keyof TMapStructure
       : never;
 
-type PropertyType<T extends Node | Relationship | Map, K extends string> = T extends Node<
+type PropertyType<T extends ValueWithProps, K extends string> = T extends Optional<
+  infer TInner
+>
+  ? TInner extends ValueWithPropsInner
+    ? MakeOptional<PropertyTypeInner<TInner, K>>
+    : never
+  : T extends ValueWithPropsInner
+    ? PropertyTypeInner<T, K>
+    : never;
+
+type PropertyTypeInner<T extends ValueWithPropsInner, K extends string> = T extends Node<
   infer TNodeDef
 >
   ? TNodeDef extends NodeDefinition | AbstractNodeDefinition
