@@ -17,7 +17,6 @@ import { getModelDebugName } from "@schema/utils";
 import { MakeOptional, Optional } from "@cypher/types/optional";
 import { Id } from "@utils/Id";
 import { forceNotOptional, forceOptional } from "@cypher/expression/casting";
-import { BlogPost } from "../../../example/schemas/blog";
 
 /**
  *  Property access for a strongly typed node, relationship or map
