@@ -1,20 +1,27 @@
 
-Apus is a 100% fully type-safe library for writing declarative, composable Neo4j Cypher queries, based on a schema you define using the library's elegant class-based API.
+# Apus
 
-This library was designed to be the gold standard in developer experience for writing Neo4j Cypher queries in Typescript.
+Apus is a 100% fully type-safe library for writing declarative, composable Neo4j Cypher queries, based on a schema you define using the library's elegant class-based API. The library was designed to be the gold standard in developer experience for writing Neo4j Cypher queries in Typescript.
 
 Some of the highlight features:
 - Rich API for writing succinct, declarative, and composable queries
-- 100% type-safety
-- Efficient by default — uses latest Neo4j features, and tries to prevent unintentional 'cardinality blowup'
-- Powerful schema definitions that are enforced in all queries
+- Full type-safety for all queries
+- 100% coverage of Cypher query language: any query can be constructed (without escape hatches!)
+- Encourages efficient queries: uses the latest Neo4j features, and attempts to prevent unintentional 'cardinality blowup'
+- Powerful schema definitions, enforced in all queries
 - Ability to define and handle polymorphic types, maintaining full type safety
 
-# Usage
+## Documentation
 
-### Basic Example 
+Documentation is nearly complete, but not quite ready. Once it is, the first public beta will be released.
 
-First we need to define the shape of our graph data. The example below demonstrates how to define nodes, relationships, properties, and relations between nodes.
+## Example Usage
+
+### Basic Movie & Actors Database 
+
+First we need to define the shape of our graph data, using the library's class-based schema definition API. The example below demonstrates how to define nodes, relationships, properties, and relations.
+
+The requirement for a class to be a graph entity definition is the presence of a `$` field.
 
 ```ts
 import { $, node, relationship, string, date, int, relation_one, relation_many } from "apus/schema";
@@ -25,16 +32,12 @@ class Movie {
   name         = string();
   release_date = date();
 
-  actors   = relation_many(ACTED_IN, "<-", Person);
-  reviews  = relation_one(REVIEW_OF, "<-", Person);
+  actors  = relation_many(ACTED_IN, "<-", Person);
+  reviews = relation_one(REVIEW_OF, "<-", Person);
 }
 
 class Person {
-  $ = node({ 
-    label: "Person",
-    passLabel: true, // Actor node will have both Person and Actor Labels
-    subtypes: [Actor] // Allows strong typing of subtypes
-  });
+  $ = node({ label: "Person" });
 
   name = string();
   dob  = date();
@@ -59,7 +62,11 @@ class REVIEW_OF {
 
 ```
 
-Now we can start writing queries. All queries are defined using the `query` function, which allows you build a 'pipeline' of query operations. The input of each stage  function automatically keeps track of the outpu  Here are our a few examples.
+Now we can start writing queries. All queries are defined using the `query` function, with which we can build a 'pipeline' of query operations. The output type of each stage is passed as the input type of the next stage.
+
+The pipeline is also clever enough to keeps track of the cardinality throughout — either `one`, `none-or-one`, `one-or-more` and `many`. This allows the exact output type to be known.
+
+Here are a few example queries:
 
 **Find the names of all actors in a given movie, sorted alphabetically**
 
