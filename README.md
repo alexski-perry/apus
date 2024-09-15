@@ -21,7 +21,7 @@ Documentation is nearly complete, but not quite ready! Once it is, the first pub
 
 First we must define the shape of our graph data, using the library's class-based schema definition API. The example below demonstrates how to define nodes, relationships, properties, and relations.
 
-The definitions should be fairly self-explanatory, but note that to be a graph entity definition class, a correctly defined `$` field is necessary.
+The definitions should be fairly self-explanatory. One thing to note is that, in order to be recognised as a 'graph entity definition class', you must provide a correctly defined `$` field.
 
 ```ts
 import { $, node, relationship, string, date, relation_many } from "apus/schema";
@@ -50,9 +50,9 @@ class ACTED_IN {
 
 ```
 
-Now we can start writing queries. All queries are defined using the `query` function, with which we can build a 'pipeline' of query operations. The output type of each stage is passed as the input type of the next stage.
+We can now start writing queries. These are constructed using the `query` function, which takes a variable number of 'stages', that we build into 'pipeline' of different operations. The output type of each stage is passed as the input type of the next stage. In general, the stages correspond closely to clauses in Cypher, but there are some important differences to be aware of once you get stuck into the library.
 
-The pipeline is also clever enough to keeps track of the cardinality throughout — either `one`, `none-or-one`, `one-or-more` and `many`. This allows the exact output type to be known.
+The pipeline is also clever enough to keeps track of the query cardinality throughout — either `one`, `none-or-one`, `one-or-more` and `many`. This allows the exact output type to be known.
 
 Here are a few examples:
 
@@ -120,9 +120,9 @@ const oldest_actors_query = query(
 
 ## Inheritance & Polymorphic Types
 
-We will extend the previous example to include a polymorphic type `Production`. We will define this as an 'abstract node', which means that it won't exist in its own right within our database, it will exist in the form of either a `Movie` or `TVShow`.
+We will extend the previous example to include a polymorphic type `Production`. We will define this as an 'abstract node', which means that it won't exist in its own right within our database, but as either a `Movie` or `TVShow`.
 
-We can however make use of inheritance, sharing common properties by defining them within `Production`, and then extending the class. Note that due to limitations in Typescript, we wrap the class we are extending in the special function `$` provided by the library.
+Still, we can make use of inheritance, sharing common properties by defining them within `Production`, and then extending this class. Note that due to limitations in Typescript, we wrap the class we are extending in the special function `$` provided by the library.
 
 ```ts
 import { $, node, abstract_node, relationship, string, int, relation_many } from "apus/schema";
