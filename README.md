@@ -82,7 +82,7 @@ const actor_pairs_query = query(
       .relationship(ACTED_IN, "->")
       .node(Movie)
       .relationship(ACTED_IN, "<-")
-      .node(Movie, ":b")
+      .node(Actor, ":b")
   ),
   ({ a, b }) => $where(neq(a, b)),
   ({ a, b }) => ({
