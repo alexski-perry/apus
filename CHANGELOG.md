@@ -1,5 +1,11 @@
 # @alexski-perry/apus
 
+## 0.9.2
+
+### Patch Changes
+
+- f61447f: Fix findByID cardinality
+
 ## 0.9.1
 
 ### Patch Changes
