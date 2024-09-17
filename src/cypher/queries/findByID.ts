@@ -13,6 +13,7 @@ import {
 } from "@schema/definition";
 import { Node } from "@cypher/types/structural/node";
 import { DefinitionFromClass, getNodeLabelsForMatching } from "@schema/utils";
+import { $forceCardinality } from "@cypher/operations/$forceCardinality";
 
 export const findByID = <
   TDef extends
@@ -34,6 +35,7 @@ export const findByID = <
   const baseQuery = query_untyped(
     () => $optionalMatchNode(nodeDefinition),
     node => $where(equals(propUnsafe(node, config?.propertyName ?? "id"), id ?? null)),
+    () => $forceCardinality("one"),
   );
 
   if (config && "optional" in config && config["optional"] == true) {
